@@ -1,0 +1,318 @@
+# ============================================
+# Audio Analysis Project .gitignore
+# ============================================
+
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+virtualenv/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+coverage.xml
+*.cover
+*.log
+.cache
+nosetests.xml
+
+# ============================================
+# Jupyter Notebooks
+# ============================================
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+*.ipynb_checkpoints
+
+# ============================================
+# Audio Files (can be large)
+# ============================================
+# Uncomment if you want to exclude audio files
+# *.wav
+# *.mp3
+# *.flac
+# *.aac
+# *.ogg
+# *.m4a
+# *.wma
+
+# Audio datasets (usually too large for git)
+data/audio/
+datasets/
+audio_samples/
+raw_audio/
+
+# ============================================
+# Machine Learning / Data Science
+# ============================================
+# Model files (can be large)
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.joblib
+*.pt
+*.pth
+*.ckpt
+*.pb
+*.onnx
+*.tflite
+models/
+checkpoints/
+saved_models/
+
+# Data files
+*.csv
+*.tsv
+*.parquet
+*.feather
+data/processed/
+data/raw/
+data/interim/
+
+# TensorBoard logs
+logs/
+tensorboard/
+runs/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Weights & Biases
+wandb/
+
+# ============================================
+# IDEs and Editors
+# ============================================
+# VSCode
+.vscode/
+*.code-workspace
+
+# Cursor - Keep configuration
+!.cursor/
+!.cursorrules
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+
+# Jupyter
+.jupyter/
+
+# Vim
+*.swp
+*.swo
+*~
+
+# ============================================
+# Operating System
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# ============================================
+# Sensitive Data
+# ============================================
+*.env
+.env
+.env.*
+!.env.example
+credentials.json
+secrets.json
+*.key
+*.pem
+config.local.json
+api_keys.json
+
+# ============================================
+# Logs and Temporary Files
+# ============================================
+*.log
+logs/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+
+# ============================================
+# Documentation Build Outputs
+# ============================================
+docs/_build/
+docs/.doctrees/
+site/
+_site/
+
+# ============================================
+# Package Manager
+# ============================================
+# pip
+pip-wheel-metadata/
+
+# Poetry
+poetry.lock
+
+# Pipenv
+Pipfile.lock
+
+# ============================================
+# Project Specific
+# ============================================
+# Experiment outputs
+experiments/
+outputs/
+results/
+figures/
+plots/
+
+# Temporary analysis files
+scratch/
+temp/
+tmp/
+
+# Large binary files
+*.bin
+*.dat
+
+# ============================================
+# Test Files and Artifacts
+# ============================================
+test_audio/
+*.wav
+*.mp3
+*.flac
+*.aif
+*.aiff
+SampleCharm
+samplecharm_results_*.txt
+*.txt
+!requirements.txt
+!requirements-dev.txt
+
+# ============================================
+# Debug and Temporary Files
+# ============================================
+debug_llm.py
+test_*.sh
+test_*.py
+!tests/**/test_*.py
+git_automation.sh
+.cursor_commands.sh
+
+# ============================================
+# Internal Setup Scripts (not for public repo)
+# ============================================
+setup.sh
+setup.ps1
+setup_api_key.sh
+auto_setup_and_run.sh
+run_analysis.sh
+run_gui.sh
+
+# ============================================
+# Temporary Documentation (Status/Fix Logs)
+# ============================================
+*_STATUS.md
+*_FIX*.md
+*_APPLIED.md
+*_IMPROVEMENTS.md
+*_HANDLING.md
+FIX_APPLIED.md
+LLM_STATUS.md
+LLM_FIXES_APPLIED.md
+LLM_IMPROVEMENTS.md
+LONG_AUDIO_FIX.md
+LONG_AUDIO_HANDLING.md
+TEST_STATUS.md
+TESTING_INSTRUCTIONS.md
+IMPLEMENTATION_STATUS.md
+CLAUDE_PACKAGE_READY.md
+IMPLEMENTATION_READY.md
+SETUP_SCRIPTS_READY.md
+AUTOMATION_COMPLETE.md
+CLEANUP_COMPLETE.md
+PROJECT_STRUCTURE.md
+
+# ============================================
+# Early Development Files (Moved to early_misc)
+# ============================================
+early_misc/
+claude_implementation_package/
+pseudocode/
+
+# ============================================
+# Internal Documentation (not for public repo)
+# ============================================
+SETUP.md
+SETUP_QUICK_REFERENCE.md
+AUTOMATION_GUIDE.md
+QUICK_RUN.md
+QUICK_START.md
+LLM_DEBUG_GUIDE.md
+RUN_PROGRAM_GUIDE.md
+QUEUE_SYSTEM.md
+QUEUE_SYSTEM_QUICK_REF.md
+
+# ============================================
+# Keep Important Files
+# ============================================
+# Explicitly include essential public documentation
+!README.md
+!USAGE.md
+!GUI_README.md
+!LICENSE
+!requirements.txt
+!requirements-dev.txt
+!setup.py
+!pyproject.toml

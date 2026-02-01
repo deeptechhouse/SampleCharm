@@ -1,0 +1,35 @@
+# Audio Sample Analysis Application - Requirements
+# Python 3.9+
+
+# Core Audio Processing
+librosa==0.10.1
+soundfile==0.12.1
+audioread==3.0.1
+resampy==0.4.2
+numpy==1.24.3
+scipy==1.11.4
+
+# Machine Learning
+tensorflow>=2.15.0
+tensorflow-hub>=0.15.0
+scikit-learn==1.3.2
+joblib==1.3.2
+
+# LLM Integration (TogetherAI and OpenAI)
+openai>=1.0.0
+
+# Speech Recognition (Whisper - high accuracy)
+openai-whisper>=20231117
+Pillow>=10.0.0
+
+# Data Validation & Configuration
+pydantic==2.5.0
+pydantic-settings==2.1.0
+pyyaml==6.0.1
+python-dotenv==1.0.0
+
+# Utilities
+click==8.1.7
+rich==13.7.0
+python-dateutil==2.8.2
+certifi>=2023.0.0  # SSL certificate handling

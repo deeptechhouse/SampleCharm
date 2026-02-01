@@ -1,0 +1,142 @@
+# Audio Sample Analysis Application - Configuration
+# Copy this file and customize for your environment
+
+# Audio processing configuration
+audio:
+  # Supported audio formats
+  supported_formats:
+    - .wav
+    - .aiff
+    - .aif
+    - .mp3
+    - .flac
+
+  # File size and duration limits
+  max_file_size: 524288000  # 500MB in bytes (supports large audio files)
+  max_duration: 30.0  # seconds - files longer than this will trigger queue system (user chooses: process now, queue, or skip)
+
+  # Processing configuration
+  target_sample_rate: 22050  # Hz - optimal for analysis
+
+# Analyzer configuration
+analyzers:
+  # Source classification
+  source:
+    primary: yamnet
+    enable_fallback: false  # Set to true when OpenAI is configured
+    confidence_threshold: 0.75
+
+  # Musical analysis
+  musical:
+    primary: librosa
+    enable_fallback: false
+    confidence_threshold: 0.70
+
+  # Percussive analysis
+  percussive:
+    primary: random_forest
+    enable_fallback: false
+    confidence_threshold: 0.75
+
+  # Rhythmic analysis
+  rhythmic:
+    primary: librosa
+    enable_fallback: false
+    tempo_range: [60, 240]
+
+# Speech recognition configuration (Whisper - high accuracy)
+speech:
+  enabled: true  # Set to false to disable speech recognition
+  model_size: base  # Options: tiny, base, small, medium, large
+                     # tiny=fastest/least accurate, large=slowest/most accurate
+                     # Recommended: base (good balance) or small (better accuracy)
+  language: null  # Language code (e.g., 'en', 'es', 'fr') or null for auto-detect
+  device: null  # 'cpu' or 'cuda' (null = auto-detect)
+
+# LLM configuration for audio naming, description, and speech detection
+# Supports TogetherAI (recommended) and OpenAI
+# Note: LLM will use Whisper transcription if speech analyzer is enabled
+llm:
+  enabled: true
+  provider: togetherai  # 'togetherai' or 'openai'
+  model: meta-llama/Llama-3.3-70B-Instruct-Turbo  # TogetherAI model
+  # model: gpt-4o-mini  # OpenAI model (if using openai provider)
+  api_key: ${TOGETHER_API_KEY}  # From environment variable
+  # api_key: ${OPENAI_API_KEY}  # For OpenAI
+  temperature: 0.5  # Increased for more creative descriptions
+  max_tokens: 1000
+
+# LLM-powered AI features (downstream of core analysis)
+# Each feature can be toggled independently. Entitlement/paywall will be added later.
+# Uses the same LLM provider configured above in the 'llm' section.
+llm_features:
+  user_id: "anonymous"  # Will be replaced by auth system
+  estimator:
+    time_warning_threshold: 300   # seconds — warn if estimated time exceeds this
+    cost_warning_threshold: 1.00  # USD — warn if estimated cost exceeds this
+  sample_pack_curator:
+    enabled: true
+  natural_language_search:
+    enabled: true
+  daw_suggestions:
+    enabled: true
+  batch_rename:
+    enabled: true
+  production_notes:
+    enabled: true
+  speech_deep_analyzer:
+    enabled: true
+  similar_sample_finder:
+    enabled: true
+  sample_chain:
+    enabled: true
+  marketplace_description:
+    enabled: true
+  anomaly_reporter:
+    enabled: true
+
+# OpenAI configuration (for fallback analyzers - not implemented yet)
+openai:
+  enabled: false
+  model: gpt-4-vision-preview
+  api_key: ${OPENAI_API_KEY}  # From environment variable
+  max_tokens: 1000
+  temperature: 0.1
+  timeout: 30.0
+  max_retries: 3
+
+# Cache configuration
+cache:
+  enabled: true
+  backend: memory  # 'memory' or 'redis' (redis for production)
+  max_size: 1000
+  ttl: 3600  # 1 hour
+
+# Feature extraction configuration
+features:
+  # MFCC settings
+  mfcc:
+    n_mfcc: 13
+    n_fft: 2048
+    hop_length: 512
+
+# Logging configuration
+logging:
+  level: INFO
+  format: json
+  file:
+    enabled: true
+    path: logs/app.log
+    max_bytes: 10485760
+    backup_count: 5
+  console:
+    enabled: true
+    colored: true
+
+# Performance configuration
+performance:
+  max_workers: 4
+  thread_pool_size: 4
+
+# Environment
+environment: development

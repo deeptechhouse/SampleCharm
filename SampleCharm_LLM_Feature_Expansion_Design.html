@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SampleCharm — LLM Feature Expansion: Technical Design Document</title>
+<style>
+:root{--bg-dark:#1a1a1a;--bg-medium:#2d2d2d;--bg-light:#3a3a3a;--text-primary:#f5f5f5;--text-secondary:#d0d0d0;--text-dim:#999;--accent-red:#c62828;--accent-red-light:#e53935;--border:#404040;--code-bg:#1e1e2a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#111;color:var(--text-primary);line-height:1.7}
+.nav{position:fixed;top:0;left:0;right:0;background:rgba(26,26,26,0.95);backdrop-filter:blur(8px);border-bottom:2px solid var(--accent-red);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-size:13px}
+.nav .brand{font-size:16px;letter-spacing:3px;font-weight:300}
+.nav .brand span{color:var(--accent-red)}
+.nav .toc{display:flex;gap:16px;flex-wrap:wrap;max-width:75%}
+.nav .toc a{color:var(--text-dim);text-decoration:none;font-size:11px;letter-spacing:1px;transition:color 0.2s}
+.nav .toc a:hover{color:var(--accent-red-light)}
+.container{max-width:1100px;margin:0 auto;padding:80px 60px 60px}
+h1{font-size:36px;font-weight:300;letter-spacing:3px;margin-bottom:8px}
+h1 span{color:var(--accent-red)}
+.tagline{font-size:16px;color:var(--text-dim);letter-spacing:2px;margin-bottom:32px}
+h2{font-size:24px;font-weight:300;letter-spacing:1px;margin:48px 0 20px;padding-bottom:10px;border-bottom:2px solid var(--accent-red)}
+h2 .num{color:var(--accent-red);font-weight:600;margin-right:12px;font-size:20px}
+h3{font-size:18px;color:var(--text-secondary);margin:28px 0 12px;font-weight:400}
+h4{font-size:14px;color:var(--accent-red-light);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+p{font-size:15px;color:var(--text-secondary);margin-bottom:14px}
+ul,ol{padding-left:28px;margin-bottom:14px}
+li{font-size:14px;color:var(--text-secondary);margin-bottom:6px;line-height:1.6}
+li strong{color:var(--text-primary)}
+pre{background:var(--code-bg);border:1px solid var(--border);border-left:4px solid var(--accent-red);padding:20px 24px;overflow-x:auto;font-family:'SF Mono','Fira Code',monospace;font-size:13px;line-height:1.8;margin:12px 0 20px;color:var(--text-secondary);white-space:pre-wrap;word-wrap:break-word}
+code{font-family:'SF Mono','Fira Code',monospace;font-size:13px}
+p code,li code{background:var(--bg-light);padding:2px 6px;border-radius:3px;font-size:12px}
+.kw{color:#c792ea}.str{color:#c3e88d}.fn{color:#82aaff}.cm{color:#546e7a}.num-lit{color:#f78c6c}.var{color:#f07178}
+.card{background:var(--bg-medium);border:1px solid var(--border);padding:24px;margin:16px 0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin:16px 0}
+.badge{display:inline-block;padding:3px 10px;font-size:11px;border-radius:2px;margin-right:6px;letter-spacing:0.5px;font-weight:500}
+.badge-api{background:#1b3a4b;color:#4fc3f7}
+.badge-ml{background:#1b3b1b;color:#66bb6a}
+.badge-local{background:#3b2f1b;color:#ffa726}
+.badge-single{background:#3b1b3b;color:#ce93d8}
+.badge-batch{background:#1b3a4b;color:#4fc3f7}
+table{width:100%;border-collapse:collapse;margin:16px 0}
+th{background:var(--bg-light);border-bottom:2px solid var(--accent-red);text-transform:uppercase;letter-spacing:1px;font-size:11px;padding:12px 16px;text-align:left;color:var(--text-primary)}
+td{border-bottom:1px solid var(--border);color:var(--text-secondary);padding:10px 16px;font-size:13px}
+.diagram{white-space:pre;font-family:'SF Mono','Fira Code',monospace;font-size:12px;background:var(--code-bg);border:1px solid var(--border);padding:20px;margin:16px 0;overflow-x:auto;line-height:1.6;color:var(--text-dim)}
+.diagram .hl{color:var(--accent-red);font-weight:bold}
+hr.divider{border:none;border-top:1px solid var(--border);margin:40px 0}
+.footer{text-align:center;font-size:12px;color:var(--text-dim);margin-top:60px;padding:20px 0;border-top:1px solid var(--border);letter-spacing:1px}
+.feature-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.feature-header h3{margin:0}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="brand">Sample<span>Charm</span></div>
+  <div class="toc">
+    <a href="#s1">01 Summary</a>
+    <a href="#s2">02 Architecture</a>
+    <a href="#s3">03 OOP</a>
+    <a href="#s4">04 Classes</a>
+    <a href="#s5">05 Features</a>
+    <a href="#s6">06 Estimator</a>
+    <a href="#s7">07 Models</a>
+    <a href="#s8">08 Config</a>
+    <a href="#s9">09 LLM Client</a>
+    <a href="#s10">10 Concurrency</a>
+    <a href="#s11">11 GUI</a>
+    <a href="#s12">12 CLI</a>
+    <a href="#s13">13 Testing</a>
+    <a href="#s14">14 Migration</a>
+    <a href="#s15">15 Costs</a>
+  </div>
+</div>
+
+<div class="container">
+
+<h1>Sample<span>Charm</span></h1>
+<div class="tagline">LLM Feature Expansion — Technical Design Document v1.0</div>
+
+<!-- SECTION 1 -->
+<h2 id="s1"><span class="num">01</span> Executive Summary</h2>
+
+<p>This document specifies the architecture for <strong>10 new LLM-powered features</strong> added to SampleCharm's existing ML analysis pipeline. The expansion transforms SampleCharm from a per-file analysis tool into an intelligent sample library management platform.</p>
+
+<div class="two-col">
+  <div class="card">
+    <h4>Architectural Philosophy</h4>
+    <ul>
+      <li><strong>Additive only</strong> — zero modifications to existing analyzer contracts</li>
+      <li><strong>Feature-flag gated</strong> — every new feature is independently toggleable</li>
+      <li><strong>Cost-aware</strong> — pre-scan estimation with user confirmation before API calls</li>
+      <li><strong>Protocol-driven</strong> — structural subtyping via Python Protocol for all new interfaces</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>OOP Principles Applied</h4>
+    <ul>
+      <li><strong>SOLID</strong> — all five principles explicitly mapped to design decisions</li>
+      <li><strong>Strategy Pattern</strong> — swappable LLM providers per feature</li>
+      <li><strong>Observer Pattern</strong> — real-time progress tracking &amp; cost estimation</li>
+      <li><strong>Factory Pattern</strong> — feature creation from configuration</li>
+      <li><strong>Template Method</strong> — shared prompt construction &amp; response parsing</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <h4>Feature Summary</h4>
+  <table>
+    <tr><th>#</th><th>Feature</th><th>Type</th><th>Scope</th></tr>
+    <tr><td>1</td><td>Smart Sample Pack Curator</td><td><span class="badge badge-api">API</span></td><td><span class="badge badge-batch">BATCH</span></td></tr>
+    <tr><td>2</td><td>Natural Language Sample Search</td><td><span class="badge badge-api">API</span></td><td><span class="badge badge-single">SINGLE+BATCH</span></td></tr>
+    <tr><td>3</td><td>DAW-Contextualized Suggestions</td><td><span class="badge badge-api">API</span></td><td><span class="badge badge-batch">BATCH</span></td></tr>
+    <tr><td>4</td><td>Automatic Batch Rename</td><td><span class="badge badge-api">API</span></td><td><span class="badge badge-batch">BATCH</span></td></tr>
+    <tr><td>5</td><td>Production Notes &amp; Usage Tips</td><td><span class="badge badge-api">API</span></td><td><span class="badge badge-single">SINGLE</span></td></tr>
+    <tr><td>6</td><td>Spoken Content Deep Analyzer</td><td><span class="badge badge-api">API</span></td><td><span class="badge badge-single">SINGLE</span></td></tr>
+    <tr><td>7</td><td>Similar Sample Finder</td><td><span class="badge badge-api">API</span></td><td><span class="badge badge-single">SINGLE+BATCH</span></td></tr>
+    <tr><td>8</td><td>Sample Chain / Transition Suggester</td><td><span class="badge badge-api">API</span></td><td><span class="badge badge-batch">BATCH</span></td></tr>
+    <tr><td>9</td><td>Marketplace Description Generator</td><td><span class="badge badge-api">API</span></td><td><span class="badge badge-batch">BATCH</span></td></tr>
+    <tr><td>10</td><td>Anomaly / Quality Flag Reporter</td><td><span class="badge badge-api">API</span></td><td><span class="badge badge-batch">BATCH</span></td></tr>
+  </table>
+</div>
+
+<!-- SECTION 2 -->
+<h2 id="s2"><span class="num">02</span> Architecture Overview</h2>
+
+<p>The new <code>LLMFeatureManager</code> sits as an orchestration layer between the existing <code>AudioAnalysisEngine</code> and the new feature classes. It consumes <code>AnalysisResult</code> objects produced by the existing pipeline and passes them to feature implementations.</p>
+
+<div class="diagram">
+┌─────────────────────────────────────────────────────────────────────┐
+│                        <span class="hl">SampleCharm Pipeline</span>                         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Audio Files ──▶ <span class="hl">AudioLoader</span> ──▶ AudioSample                        │
+│                                      │                              │
+│                    ┌─────────────────┼─────────────────┐            │
+│                    ▼                 ▼                  ▼            │
+│              <span class="hl">YAMNet</span>          <span class="hl">Librosa</span> (×3)        <span class="hl">Whisper</span>          │
+│              Source           Musical/Perc/Rhythm   Speech          │
+│                    │                 │                  │            │
+│                    └────────┬────────┘                  │            │
+│                             ▼                           │            │
+│                    <span class="hl">LLMAnalyzer</span> ◀──── speech_data ────┘            │
+│                             │                                       │
+│                             ▼                                       │
+│                    <span class="hl">AnalysisResult</span>  ◀── cached by SHA-256            │
+│                             │                                       │
+│  ═══════════════════════════╪═══════════════════════════════════     │
+│         NEW LAYER           │                                       │
+│                             ▼                                       │
+│               ┌─────────────────────────┐                           │
+│               │  <span class="hl">AnalysisTimeEstimator</span>  │ ◀── pre-scan phase          │
+│               └────────────┬────────────┘                           │
+│                            ▼                                        │
+│               ┌─────────────────────────┐                           │
+│               │   <span class="hl">LLMFeatureManager</span>     │ ◀── orchestrates features    │
+│               │   (shared LLM client)   │                           │
+│               └────────────┬────────────┘                           │
+│                            │                                        │
+│         ┌──────┬───────┬───┴───┬───────┬───────┐                    │
+│         ▼      ▼       ▼       ▼       ▼       ▼                    │
+│     <span class="hl">PackCur</span> <span class="hl">NLSearch</span> <span class="hl">DAWSug</span> <span class="hl">Rename</span>  <span class="hl">Notes</span>  <span class="hl">...</span>               │
+│     (Batch) (S+B)   (Batch) (Batch) (Single)                      │
+│                                                                     │
+│               ┌─────────────────────────┐                           │
+│               │    <span class="hl">ProgressTracker</span>      │ ◀── Observer pattern         │
+│               └─────────────────────────┘                           │
+└─────────────────────────────────────────────────────────────────────┘
+</div>
+
+<!-- SECTION 3 -->
+<h2 id="s3"><span class="num">03</span> OOP Design Principles Applied</h2>
+
+<div class="two-col">
+  <div class="card">
+    <h4>Single Responsibility</h4>
+    <p>Each of the 10 features is its own class with a single purpose. <code>LLMFeatureManager</code> handles orchestration only. <code>AnalysisTimeEstimator</code> handles estimation only. <code>ProgressTracker</code> handles progress only.</p>
+  </div>
+  <div class="card">
+    <h4>Open/Closed</h4>
+    <p>New features extend the system by implementing the <code>LLMFeature</code> protocol. Existing <code>AudioAnalysisEngine</code>, analyzers, and data models are <strong>never modified</strong>. The feature manager discovers features via configuration.</p>
+  </div>
+  <div class="card">
+    <h4>Liskov Substitution</h4>
+    <p>All features implement a common <code>LLMFeature</code> protocol. <code>SingleFileFeature</code> and <code>BatchFeature</code> are substitutable subtypes. The manager treats them uniformly through the protocol interface.</p>
+  </div>
+  <div class="card">
+    <h4>Interface Segregation</h4>
+    <p>Separate protocols for single-file (<code>execute(result) → T</code>) vs batch (<code>execute_batch(results) → T</code>) operations. Features implement only the interface they need. No feature is forced to implement unused methods.</p>
+  </div>
+</div>
+<div class="two-col">
+  <div class="card">
+    <h4>Dependency Inversion</h4>
+    <p>Features depend on <code>AnalysisResult</code> (abstraction), not on concrete analyzers. The LLM client is injected, not constructed internally. Configuration is injected via factory.</p>
+  </div>
+  <div class="card">
+    <h4>Design Patterns</h4>
+    <ul>
+      <li><strong>Strategy</strong> — LLM provider swappable per feature via <code>LLMClient</code> abstraction</li>
+      <li><strong>Observer</strong> — <code>ProgressTracker</code> notifies GUI/CLI listeners of progress events</li>
+      <li><strong>Factory</strong> — <code>LLMFeatureFactory.create_features(config)</code> builds feature set</li>
+      <li><strong>Template Method</strong> — <code>BaseLLMFeature</code> provides <code>execute()</code> wrapping <code>_build_prompt()</code> and <code>_parse_response()</code></li>
+    </ul>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<h2 id="s4"><span class="num">04</span> New Class Hierarchy</h2>
+
+<pre><code><span class="cm"># --- Protocols (structural subtyping) ---</span>
+
+<span class="kw">class</span> <span class="fn">LLMFeature</span>(<span class="fn">Protocol</span>):
+    <span class="str">"""Base protocol for all LLM-powered features."""</span>
+    name: <span class="fn">str</span>
+    version: <span class="fn">str</span>
+    description: <span class="fn">str</span>
+    requires_batch: <span class="fn">bool</span>
+
+<span class="kw">class</span> <span class="fn">SingleFileFeature</span>(<span class="fn">LLMFeature</span>, <span class="fn">Protocol</span>):
+    <span class="kw">def</span> <span class="fn">execute</span>(<span class="var">self</span>, result: <span class="fn">AnalysisResult</span>, client: <span class="fn">LLMClient</span>) -> <span class="fn">FeatureOutput</span>: ...
+
+<span class="kw">class</span> <span class="fn">BatchFeature</span>(<span class="fn">LLMFeature</span>, <span class="fn">Protocol</span>):
+    <span class="kw">def</span> <span class="fn">execute_batch</span>(<span class="var">self</span>, results: <span class="fn">List</span>[<span class="fn">AnalysisResult</span>], client: <span class="fn">LLMClient</span>) -> <span class="fn">FeatureOutput</span>: ...
+
+<span class="cm"># --- Base class (Template Method) ---</span>
+
+<span class="kw">class</span> <span class="fn">BaseLLMFeature</span>(<span class="fn">Generic</span>[<span class="fn">T</span>]):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, config: <span class="fn">FeatureConfig</span>) -> <span class="kw">None</span>
+    <span class="kw">def</span> <span class="fn">execute</span>(<span class="var">self</span>, ...) -> <span class="fn">T</span>:  <span class="cm"># Template method</span>
+        prompt = <span class="var">self</span>._build_prompt(...)
+        response = <span class="var">self</span>._call_llm(prompt)
+        <span class="kw">return</span> <span class="var">self</span>._parse_response(response)
+    <span class="kw">def</span> <span class="fn">_build_prompt</span>(<span class="var">self</span>, ...) -> <span class="fn">str</span>: ...    <span class="cm"># Abstract</span>
+    <span class="kw">def</span> <span class="fn">_parse_response</span>(<span class="var">self</span>, raw: <span class="fn">str</span>) -> <span class="fn">T</span>: ...  <span class="cm"># Abstract</span>
+
+<span class="cm"># --- Orchestration ---</span>
+
+<span class="kw">class</span> <span class="fn">LLMFeatureManager</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, features: <span class="fn">List</span>[<span class="fn">LLMFeature</span>], client: <span class="fn">LLMClient</span>,
+                 estimator: <span class="fn">AnalysisTimeEstimator</span>, tracker: <span class="fn">ProgressTracker</span>)
+    <span class="kw">def</span> <span class="fn">run_single_features</span>(<span class="var">self</span>, result: <span class="fn">AnalysisResult</span>) -> <span class="fn">Dict</span>[<span class="fn">str</span>, <span class="fn">FeatureOutput</span>]
+    <span class="kw">def</span> <span class="fn">run_batch_features</span>(<span class="var">self</span>, results: <span class="fn">List</span>[<span class="fn">AnalysisResult</span>]) -> <span class="fn">Dict</span>[<span class="fn">str</span>, <span class="fn">FeatureOutput</span>]
+
+<span class="cm"># --- Estimation &amp; Progress ---</span>
+
+<span class="kw">class</span> <span class="fn">AnalysisTimeEstimator</span>:
+    <span class="kw">def</span> <span class="fn">pre_scan</span>(<span class="var">self</span>, paths: <span class="fn">List</span>[<span class="fn">Path</span>]) -> <span class="fn">PreScanResult</span>
+    <span class="kw">def</span> <span class="fn">estimate</span>(<span class="var">self</span>, scan: <span class="fn">PreScanResult</span>, features: <span class="fn">List</span>[<span class="fn">str</span>]) -> <span class="fn">TimeEstimate</span>
+
+<span class="kw">class</span> <span class="fn">ProgressTracker</span>:  <span class="cm"># Observer pattern</span>
+    <span class="kw">def</span> <span class="fn">subscribe</span>(<span class="var">self</span>, listener: <span class="fn">ProgressListener</span>) -> <span class="kw">None</span>
+    <span class="kw">def</span> <span class="fn">update</span>(<span class="var">self</span>, event: <span class="fn">ProgressEvent</span>) -> <span class="kw">None</span>
+
+<span class="cm"># --- Feature Implementations ---</span>
+<span class="cm"># SmartPackCurator(BaseLLMFeature[PackCurationResult])</span>
+<span class="cm"># NaturalLanguageSearch(BaseLLMFeature[SearchResult])</span>
+<span class="cm"># DAWContextSuggester(BaseLLMFeature[SuggestionResult])</span>
+<span class="cm"># BatchRenamer(BaseLLMFeature[RenameResult])</span>
+<span class="cm"># ProductionNotesGenerator(BaseLLMFeature[ProductionNotes])</span>
+<span class="cm"># SpokenContentAnalyzer(BaseLLMFeature[SpokenContentResult])</span>
+<span class="cm"># SimilarSampleFinder(BaseLLMFeature[SimilarityResult])</span>
+<span class="cm"># SampleChainSuggester(BaseLLMFeature[ChainResult])</span>
+<span class="cm"># MarketplaceDescriptionGen(BaseLLMFeature[MarketplaceResult])</span>
+<span class="cm"># AnomalyReporter(BaseLLMFeature[AnomalyReport])</span>
+</code></pre>
+
+<!-- SECTION 5 -->
+<h2 id="s5"><span class="num">05</span> Per-Feature Deep Design</h2>
+
+<!-- FEATURE 1 -->
+<h3>5.1 — Smart Sample Pack Curator</h3>
+<div class="feature-header">
+  <span class="badge badge-api">API</span>
+  <span class="badge badge-batch">BATCH</span>
+</div>
+
+<p>Groups analyzed samples into coherent themed packs by sending all analysis results to the LLM for semantic clustering. Outputs JSON manifests and optional folder-copy operations.</p>
+
+<div class="card">
+<h4>Output Dataclass</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">SamplePack</span>:
+    name: <span class="fn">str</span>                       <span class="cm"># e.g. "Lo-Fi Dusty Drums"</span>
+    description: <span class="fn">str</span>
+    tags: <span class="fn">List</span>[<span class="fn">str</span>]
+    sample_hashes: <span class="fn">List</span>[<span class="fn">str</span>]       <span class="cm"># SHA-256 refs to AnalysisResults</span>
+    confidence: <span class="fn">float</span>
+
+<span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">PackCurationResult</span>:
+    packs: <span class="fn">List</span>[<span class="fn">SamplePack</span>]
+    uncategorized: <span class="fn">List</span>[<span class="fn">str</span>]       <span class="cm"># hashes that didn't fit any pack</span>
+    model_used: <span class="fn">str</span>
+    total_tokens: <span class="fn">int</span>
+</code></pre>
+</div>
+
+<div class="card">
+<h4>Class Definition</h4>
+<pre><code><span class="kw">class</span> <span class="fn">SmartPackCurator</span>(<span class="fn">BaseLLMFeature</span>[<span class="fn">PackCurationResult</span>]):
+    name = <span class="str">"smart_pack_curator"</span>
+    version = <span class="str">"1.0.0"</span>
+    requires_batch = <span class="kw">True</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, config: <span class="fn">FeatureConfig</span>,
+                 max_packs: <span class="fn">int</span> = <span class="num-lit">10</span>,
+                 min_samples_per_pack: <span class="fn">int</span> = <span class="num-lit">3</span>) -> <span class="kw">None</span>:
+        <span class="kw">super</span>().__init__(config)
+        <span class="var">self</span>.max_packs = max_packs
+        <span class="var">self</span>.min_samples_per_pack = min_samples_per_pack
+
+    <span class="kw">def</span> <span class="fn">execute_batch</span>(<span class="var">self</span>, results: <span class="fn">List</span>[<span class="fn">AnalysisResult</span>],
+                       client: <span class="fn">LLMClient</span>) -> <span class="fn">PackCurationResult</span>:
+        prompt = <span class="var">self</span>._build_prompt(results)
+        response = client.complete(prompt, temperature=<span class="num-lit">0.4</span>)
+        <span class="kw">return</span> <span class="var">self</span>._parse_response(response)
+
+    <span class="kw">def</span> <span class="fn">export_manifest</span>(<span class="var">self</span>, result: <span class="fn">PackCurationResult</span>,
+                        output_dir: <span class="fn">Path</span>) -> <span class="fn">List</span>[<span class="fn">Path</span>]: ...
+
+    <span class="kw">def</span> <span class="fn">copy_to_folders</span>(<span class="var">self</span>, result: <span class="fn">PackCurationResult</span>,
+                        source_map: <span class="fn">Dict</span>[<span class="fn">str</span>, <span class="fn">Path</span>],
+                        output_dir: <span class="fn">Path</span>,
+                        dry_run: <span class="fn">bool</span> = <span class="kw">True</span>) -> <span class="fn">List</span>[<span class="fn">Tuple</span>[<span class="fn">Path</span>, <span class="fn">Path</span>]]: ...
+</code></pre>
+</div>
+
+<div class="card">
+<h4>LLM Prompt Template</h4>
+<pre><code>SYSTEM_PROMPT = <span class="str">"""You are an expert audio sample library curator and sound designer.
+You organize audio samples into themed packs based on their sonic characteristics,
+musical properties, and production style. Return JSON only."""</span>
+
+USER_PROMPT = <span class="str">"""Analyze these {count} audio samples and group them into themed packs.
+
+Sample data:
+{samples_json}
+
+Requirements:
+- Create up to {max_packs} packs with at least {min_per_pack} samples each
+- Each pack needs: name (creative, marketable), description, tags
+- Group by: sonic character, genre, production style, energy level
+- Samples can only belong to one pack
+- List any samples that don't fit any pack
+
+Return JSON: {{"packs": [{{"name": str, "description": str, "tags": [str],
+"sample_ids": [str], "confidence": float}}], "uncategorized": [str]}}"""</span>
+</code></pre>
+</div>
+
+<div class="two-col">
+<div class="card">
+<h4>Integration Points</h4>
+<ul>
+  <li><strong>GUI:</strong> "Curate Packs" button in batch results panel; preview dialog with drag-drop reordering</li>
+  <li><strong>CLI:</strong> <code>samplecharm curate --output-dir ./packs --dry-run</code></li>
+  <li><strong>Config:</strong> <code>features.pack_curator.max_packs</code>, <code>.min_samples</code></li>
+</ul>
+</div>
+<div class="card">
+<h4>Cost Estimate</h4>
+<ul>
+  <li><strong>Tokens per call:</strong> ~2,000–8,000 (scales with batch size)</li>
+  <li><strong>Cost per 100 files:</strong> ~$0.02 (Llama-3.3-70B) / ~$0.08 (gpt-4o-mini)</li>
+  <li><strong>Latency:</strong> 3–8s per batch call</li>
+</ul>
+</div>
+</div>
+
+<!-- FEATURE 2 -->
+<h3>5.2 — Natural Language Sample Search</h3>
+<div class="feature-header">
+  <span class="badge badge-api">API</span>
+  <span class="badge badge-single">SINGLE+BATCH</span>
+</div>
+
+<p>Semantic search over analysis metadata. Users type queries like "bright snare with short decay around 130 BPM" and the LLM returns ranked matches with relevance scores.</p>
+
+<div class="card">
+<h4>Output Dataclass</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">SearchMatch</span>:
+    sample_hash: <span class="fn">str</span>
+    relevance_score: <span class="fn">float</span>         <span class="cm"># 0.0–1.0</span>
+    explanation: <span class="fn">str</span>              <span class="cm"># why it matched</span>
+    matched_attributes: <span class="fn">List</span>[<span class="fn">str</span>] <span class="cm"># which fields contributed</span>
+
+<span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">SearchResult</span>:
+    query: <span class="fn">str</span>
+    matches: <span class="fn">List</span>[<span class="fn">SearchMatch</span>]     <span class="cm"># sorted by relevance</span>
+    total_searched: <span class="fn">int</span>
+    model_used: <span class="fn">str</span>
+</code></pre>
+</div>
+
+<div class="card">
+<h4>Class Definition</h4>
+<pre><code><span class="kw">class</span> <span class="fn">NaturalLanguageSearch</span>(<span class="fn">BaseLLMFeature</span>[<span class="fn">SearchResult</span>]):
+    name = <span class="str">"nl_search"</span>
+    version = <span class="str">"1.0.0"</span>
+    requires_batch = <span class="kw">True</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, config: <span class="fn">FeatureConfig</span>,
+                 max_results: <span class="fn">int</span> = <span class="num-lit">20</span>) -> <span class="kw">None</span>:
+        <span class="kw">super</span>().__init__(config)
+        <span class="var">self</span>.max_results = max_results
+
+    <span class="kw">def</span> <span class="fn">search</span>(<span class="var">self</span>, query: <span class="fn">str</span>,
+               results: <span class="fn">List</span>[<span class="fn">AnalysisResult</span>],
+               client: <span class="fn">LLMClient</span>) -> <span class="fn">SearchResult</span>:
+        context = <span class="var">self</span>._build_search_context(results)
+        prompt = <span class="var">self</span>._build_prompt(query, context)
+        response = client.complete(prompt, temperature=<span class="num-lit">0.2</span>)
+        <span class="kw">return</span> <span class="var">self</span>._parse_response(response, query)
+
+    <span class="kw">def</span> <span class="fn">_build_search_context</span>(<span class="var">self</span>,
+        results: <span class="fn">List</span>[<span class="fn">AnalysisResult</span>]) -> <span class="fn">str</span>: ...
+</code></pre>
+</div>
+
+<div class="card">
+<h4>LLM Prompt Template</h4>
+<pre><code>SYSTEM_PROMPT = <span class="str">"""You are an expert audio search engine. Given a natural language query
+and a database of audio sample analyses, return the most relevant matches ranked
+by relevance. Consider BPM, key, timbre, source type, tags, and descriptions.
+Return JSON only."""</span>
+
+USER_PROMPT = <span class="str">"""Query: "{query}"
+
+Available samples:
+{samples_context}
+
+Return the top {max_results} matches as JSON:
+{{"matches": [{{"sample_id": str, "relevance": float, "explanation": str,
+"matched_attributes": [str]}}]}}"""</span>
+</code></pre>
+</div>
+
+<div class="two-col">
+<div class="card"><h4>Integration</h4>
+<ul>
+  <li><strong>GUI:</strong> Search bar above results table with real-time filtering</li>
+  <li><strong>CLI:</strong> <code>samplecharm search "bright snare 130bpm" --dir ./samples</code></li>
+</ul>
+</div>
+<div class="card"><h4>Cost</h4>
+<ul>
+  <li><strong>Tokens:</strong> ~1,500–6,000 per search</li>
+  <li><strong>Cost:</strong> ~$0.01 per search (Llama-3.3-70B)</li>
+  <li><strong>Latency:</strong> 2–5s</li>
+</ul>
+</div>
+</div>
+
+<!-- FEATURE 3 -->
+<h3>5.3 — DAW-Contextualized Suggestions</h3>
+<div class="feature-header">
+  <span class="badge badge-api">API</span>
+  <span class="badge badge-batch">BATCH</span>
+</div>
+
+<p>Given project context (BPM, key, genre, mood), recommends which loaded samples fit, suggests layering combinations, and flags key/tempo conflicts using Camelot wheel and harmonic series.</p>
+
+<div class="card">
+<h4>Output Dataclass</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">SampleSuggestion</span>:
+    sample_hash: <span class="fn">str</span>
+    fit_score: <span class="fn">float</span>
+    reason: <span class="fn">str</span>
+    conflicts: <span class="fn">List</span>[<span class="fn">str</span>]           <span class="cm"># e.g. ["key_mismatch: Eb vs C"]</span>
+    layer_with: <span class="fn">List</span>[<span class="fn">str</span>]           <span class="cm"># hashes of complementary samples</span>
+
+<span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">DAWContext</span>:
+    bpm: <span class="fn">float</span>
+    key: <span class="fn">str</span>
+    genre: <span class="fn">str</span>
+    mood: <span class="fn">str</span>
+    notes: <span class="fn">Optional</span>[<span class="fn">str</span>] = <span class="kw">None</span>
+
+<span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">SuggestionResult</span>:
+    context: <span class="fn">DAWContext</span>
+    suggestions: <span class="fn">List</span>[<span class="fn">SampleSuggestion</span>]
+    layer_groups: <span class="fn">List</span>[<span class="fn">List</span>[<span class="fn">str</span>]]   <span class="cm"># groups of hashes that work together</span>
+    model_used: <span class="fn">str</span>
+</code></pre>
+</div>
+
+<div class="card">
+<h4>Class Definition &amp; Prompt</h4>
+<pre><code><span class="kw">class</span> <span class="fn">DAWContextSuggester</span>(<span class="fn">BaseLLMFeature</span>[<span class="fn">SuggestionResult</span>]):
+    name = <span class="str">"daw_suggestions"</span>
+    requires_batch = <span class="kw">True</span>
+
+    <span class="kw">def</span> <span class="fn">suggest</span>(<span class="var">self</span>, context: <span class="fn">DAWContext</span>,
+                results: <span class="fn">List</span>[<span class="fn">AnalysisResult</span>],
+                client: <span class="fn">LLMClient</span>) -> <span class="fn">SuggestionResult</span>: ...
+
+SYSTEM_PROMPT = <span class="str">"""You are a music production assistant with deep knowledge of
+music theory, the Camelot wheel, harmonic mixing, and genre conventions.
+Recommend samples that fit a given project context. Flag conflicts."""</span>
+
+USER_PROMPT = <span class="str">"""Project context: BPM={bpm}, Key={key}, Genre={genre}, Mood={mood}
+
+Available samples:
+{samples_json}
+
+For each sample, score fitness (0-1), explain why, flag tempo/key conflicts,
+and suggest layering combinations. Use Camelot wheel for key compatibility.
+Return JSON: {{"suggestions": [...], "layer_groups": [...]}}"""</span>
+</code></pre>
+</div>
+
+<!-- FEATURE 4 -->
+<h3>5.4 — Automatic Batch Rename &amp; File Organization</h3>
+<div class="feature-header">
+  <span class="badge badge-api">API</span>
+  <span class="badge badge-batch">BATCH</span>
+</div>
+
+<p>Extends single-file naming to batch mode with user-selectable templates (e.g., <code>BPM_Key_Type_Description.wav</code>). Includes dry-run preview.</p>
+
+<div class="card">
+<h4>Output Dataclass &amp; Class</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">RenameEntry</span>:
+    original_path: <span class="fn">Path</span>
+    new_name: <span class="fn">str</span>
+    new_path: <span class="fn">Path</span>
+    confidence: <span class="fn">float</span>
+
+<span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">RenameResult</span>:
+    entries: <span class="fn">List</span>[<span class="fn">RenameEntry</span>]
+    naming_template: <span class="fn">str</span>
+    conflicts: <span class="fn">List</span>[<span class="fn">str</span>]            <span class="cm"># duplicate names detected</span>
+
+<span class="kw">class</span> <span class="fn">BatchRenamer</span>(<span class="fn">BaseLLMFeature</span>[<span class="fn">RenameResult</span>]):
+    name = <span class="str">"batch_renamer"</span>
+    requires_batch = <span class="kw">True</span>
+
+    TEMPLATES = {
+        <span class="str">"standard"</span>: <span class="str">"{bpm}_{key}_{type}_{description}"</span>,
+        <span class="str">"minimal"</span>:  <span class="str">"{type}_{description}"</span>,
+        <span class="str">"full"</span>:     <span class="str">"{bpm}_{key}_{type}_{mood}_{description}"</span>,
+    }
+
+    <span class="kw">def</span> <span class="fn">rename_batch</span>(<span class="var">self</span>, results: <span class="fn">List</span>[<span class="fn">AnalysisResult</span>],
+                     template: <span class="fn">str</span>, client: <span class="fn">LLMClient</span>,
+                     dry_run: <span class="fn">bool</span> = <span class="kw">True</span>) -> <span class="fn">RenameResult</span>: ...
+
+    <span class="kw">def</span> <span class="fn">apply_renames</span>(<span class="var">self</span>, result: <span class="fn">RenameResult</span>) -> <span class="fn">List</span>[<span class="fn">Path</span>]: ...
+</code></pre>
+</div>
+
+<!-- FEATURE 5 -->
+<h3>5.5 — Production Notes &amp; Usage Tips Generator</h3>
+<div class="feature-header">
+  <span class="badge badge-api">API</span>
+  <span class="badge badge-single">SINGLE</span>
+</div>
+
+<p>Per-sample actionable producer notes: EQ suggestions, layering advice, mixing tips, arrangement placement. Uses spectral, harmonic/percussive, and source data.</p>
+
+<div class="card">
+<h4>Output Dataclass &amp; Class</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">ProductionNotes</span>:
+    eq_suggestions: <span class="fn">List</span>[<span class="fn">str</span>]       <span class="cm"># e.g. "Boost 3-5kHz for presence"</span>
+    layering_advice: <span class="fn">List</span>[<span class="fn">str</span>]
+    mixing_tips: <span class="fn">List</span>[<span class="fn">str</span>]
+    arrangement_placement: <span class="fn">List</span>[<span class="fn">str</span>] <span class="cm"># e.g. "Works well in verse sections"</span>
+    processing_chain: <span class="fn">List</span>[<span class="fn">str</span>]     <span class="cm"># recommended FX chain</span>
+    sample_hash: <span class="fn">str</span>
+
+<span class="kw">class</span> <span class="fn">ProductionNotesGenerator</span>(<span class="fn">BaseLLMFeature</span>[<span class="fn">ProductionNotes</span>]):
+    name = <span class="str">"production_notes"</span>
+    requires_batch = <span class="kw">False</span>
+
+    <span class="kw">def</span> <span class="fn">execute</span>(<span class="var">self</span>, result: <span class="fn">AnalysisResult</span>,
+                client: <span class="fn">LLMClient</span>) -> <span class="fn">ProductionNotes</span>: ...
+
+SYSTEM_PROMPT = <span class="str">"""You are a professional mixing/mastering engineer and music producer.
+Given an audio sample's analysis, provide actionable production notes including
+EQ tips, layering suggestions, FX chain recommendations, and arrangement ideas.
+Be specific — reference frequencies, dB values, and plugin types."""</span>
+</code></pre>
+</div>
+
+<!-- FEATURE 6 -->
+<h3>5.6 — Spoken Content Deep Analyzer</h3>
+<div class="feature-header">
+  <span class="badge badge-api">API</span>
+  <span class="badge badge-single">SINGLE</span>
+</div>
+
+<p>When Whisper detects speech, performs deeper analysis: sentiment, tone, language register, genre fit, and content warnings for licensing compliance.</p>
+
+<div class="card">
+<h4>Output Dataclass &amp; Class</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">SpokenContentResult</span>:
+    sentiment: <span class="fn">str</span>                  <span class="cm"># positive/negative/neutral</span>
+    sentiment_score: <span class="fn">float</span>          <span class="cm"># -1.0 to 1.0</span>
+    tone: <span class="fn">str</span>                       <span class="cm"># e.g. "aggressive", "calm", "excited"</span>
+    language_register: <span class="fn">str</span>          <span class="cm"># formal/informal/slang</span>
+    genre_fit: <span class="fn">List</span>[<span class="fn">str</span>]            <span class="cm"># e.g. ["hip-hop ad-lib", "podcast"]</span>
+    content_warnings: <span class="fn">List</span>[<span class="fn">str</span>]     <span class="cm"># profanity, sensitive topics</span>
+    licensing_notes: <span class="fn">str</span>
+    sample_hash: <span class="fn">str</span>
+
+<span class="kw">class</span> <span class="fn">SpokenContentAnalyzer</span>(<span class="fn">BaseLLMFeature</span>[<span class="fn">SpokenContentResult</span>]):
+    name = <span class="str">"spoken_content"</span>
+    requires_batch = <span class="kw">False</span>
+
+    <span class="kw">def</span> <span class="fn">execute</span>(<span class="var">self</span>, result: <span class="fn">AnalysisResult</span>,
+                client: <span class="fn">LLMClient</span>) -> <span class="fn">Optional</span>[<span class="fn">SpokenContentResult</span>]:
+        <span class="cm"># Returns None if no speech detected</span>
+        <span class="kw">if not</span> result.llm_analysis <span class="kw">or not</span> result.llm_analysis.contains_speech:
+            <span class="kw">return</span> <span class="kw">None</span>
+        ...
+</code></pre>
+</div>
+
+<!-- FEATURE 7 -->
+<h3>5.7 — Similar Sample Finder</h3>
+<div class="feature-header">
+  <span class="badge badge-api">API</span>
+  <span class="badge badge-single">SINGLE+BATCH</span>
+</div>
+
+<p>Select a reference sample and find similar ones. The LLM compares full analysis profiles and returns ranked matches with explanations. Weights attributes contextually (timbre for drums, key for melodic).</p>
+
+<div class="card">
+<h4>Output Dataclass &amp; Class</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">SimilarMatch</span>:
+    sample_hash: <span class="fn">str</span>
+    similarity_score: <span class="fn">float</span>
+    explanation: <span class="fn">str</span>
+    shared_attributes: <span class="fn">Dict</span>[<span class="fn">str</span>, <span class="fn">str</span>]  <span class="cm"># attribute → comparison note</span>
+
+<span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">SimilarityResult</span>:
+    reference_hash: <span class="fn">str</span>
+    matches: <span class="fn">List</span>[<span class="fn">SimilarMatch</span>]
+    weighting_strategy: <span class="fn">str</span>        <span class="cm"># e.g. "percussive_focused"</span>
+
+<span class="kw">class</span> <span class="fn">SimilarSampleFinder</span>(<span class="fn">BaseLLMFeature</span>[<span class="fn">SimilarityResult</span>]):
+    name = <span class="str">"similar_finder"</span>
+
+    <span class="kw">def</span> <span class="fn">find_similar</span>(<span class="var">self</span>, reference: <span class="fn">AnalysisResult</span>,
+                      candidates: <span class="fn">List</span>[<span class="fn">AnalysisResult</span>],
+                      client: <span class="fn">LLMClient</span>,
+                      top_k: <span class="fn">int</span> = <span class="num-lit">10</span>) -> <span class="fn">SimilarityResult</span>: ...
+</code></pre>
+</div>
+
+<!-- FEATURE 8 -->
+<h3>5.8 — Sample Chain / Transition Suggester</h3>
+<div class="feature-header">
+  <span class="badge badge-api">API</span>
+  <span class="badge badge-batch">BATCH</span>
+</div>
+
+<p>Given samples, suggests optimal ordering based on BPM progression, Camelot key compatibility, and energy arc (spectral brightness trajectory).</p>
+
+<div class="card">
+<h4>Output Dataclass &amp; Class</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">TransitionPoint</span>:
+    from_hash: <span class="fn">str</span>
+    to_hash: <span class="fn">str</span>
+    transition_note: <span class="fn">str</span>          <span class="cm"># e.g. "BPM +2, same Camelot key 8A"</span>
+    compatibility_score: <span class="fn">float</span>
+
+<span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">ChainResult</span>:
+    ordered_hashes: <span class="fn">List</span>[<span class="fn">str</span>]
+    transitions: <span class="fn">List</span>[<span class="fn">TransitionPoint</span>]
+    energy_arc: <span class="fn">str</span>                <span class="cm"># description of energy flow</span>
+    overall_score: <span class="fn">float</span>
+
+<span class="kw">class</span> <span class="fn">SampleChainSuggester</span>(<span class="fn">BaseLLMFeature</span>[<span class="fn">ChainResult</span>]):
+    name = <span class="str">"chain_suggester"</span>
+    requires_batch = <span class="kw">True</span>
+
+    <span class="kw">def</span> <span class="fn">suggest_chain</span>(<span class="var">self</span>, results: <span class="fn">List</span>[<span class="fn">AnalysisResult</span>],
+                       client: <span class="fn">LLMClient</span>,
+                       energy_preference: <span class="fn">str</span> = <span class="str">"ascending"</span>) -> <span class="fn">ChainResult</span>: ...
+</code></pre>
+</div>
+
+<!-- FEATURE 9 -->
+<h3>5.9 — Marketplace Description Generator</h3>
+<div class="feature-header">
+  <span class="badge badge-api">API</span>
+  <span class="badge badge-batch">BATCH</span>
+</div>
+
+<p>Batch-analyze a pack and generate marketing copy, tag lists, and genre categorization for Splice, Loopmasters, etc.</p>
+
+<div class="card">
+<h4>Output Dataclass &amp; Class</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">MarketplaceResult</span>:
+    pack_name: <span class="fn">str</span>
+    headline: <span class="fn">str</span>                  <span class="cm"># 1-line marketing hook</span>
+    description: <span class="fn">str</span>               <span class="cm"># 150-300 word marketing copy</span>
+    tags: <span class="fn">List</span>[<span class="fn">str</span>]                 <span class="cm"># marketplace tags (20-30)</span>
+    genres: <span class="fn">List</span>[<span class="fn">str</span>]
+    stats: <span class="fn">Dict</span>[<span class="fn">str</span>, <span class="fn">Any</span>]          <span class="cm"># sample count, BPM range, key distribution</span>
+    target_platforms: <span class="fn">List</span>[<span class="fn">str</span>]
+
+<span class="kw">class</span> <span class="fn">MarketplaceDescriptionGen</span>(<span class="fn">BaseLLMFeature</span>[<span class="fn">MarketplaceResult</span>]):
+    name = <span class="str">"marketplace_gen"</span>
+    requires_batch = <span class="kw">True</span>
+
+    <span class="kw">def</span> <span class="fn">generate</span>(<span class="var">self</span>, results: <span class="fn">List</span>[<span class="fn">AnalysisResult</span>],
+                  pack_name: <span class="fn">str</span>,
+                  client: <span class="fn">LLMClient</span>,
+                  platforms: <span class="fn">List</span>[<span class="fn">str</span>] = [<span class="str">"splice"</span>]) -> <span class="fn">MarketplaceResult</span>: ...
+</code></pre>
+</div>
+
+<!-- FEATURE 10 -->
+<h3>5.10 — Anomaly / Quality Flag Reporter</h3>
+<div class="feature-header">
+  <span class="badge badge-api">API</span>
+  <span class="badge badge-batch">BATCH</span>
+</div>
+
+<p>Reviews all batch results and flags: DC offset, clipping, mislabeled files (folder name vs content), near-duplicates, and outliers.</p>
+
+<div class="card">
+<h4>Output Dataclass &amp; Class</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">AnomalyFlag</span>:
+    sample_hash: <span class="fn">str</span>
+    flag_type: <span class="fn">str</span>                 <span class="cm"># "dc_offset"|"clipping"|"mislabel"|"duplicate"|"outlier"</span>
+    severity: <span class="fn">str</span>                  <span class="cm"># "low"|"medium"|"high"</span>
+    description: <span class="fn">str</span>
+    recommendation: <span class="fn">str</span>
+
+<span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">DuplicateGroup</span>:
+    hashes: <span class="fn">List</span>[<span class="fn">str</span>]
+    similarity_reason: <span class="fn">str</span>
+
+<span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">AnomalyReport</span>:
+    flags: <span class="fn">List</span>[<span class="fn">AnomalyFlag</span>]
+    duplicate_groups: <span class="fn">List</span>[<span class="fn">DuplicateGroup</span>]
+    overall_quality_score: <span class="fn">float</span>   <span class="cm"># 0.0–1.0 for the collection</span>
+    summary: <span class="fn">str</span>
+
+<span class="kw">class</span> <span class="fn">AnomalyReporter</span>(<span class="fn">BaseLLMFeature</span>[<span class="fn">AnomalyReport</span>]):
+    name = <span class="str">"anomaly_reporter"</span>
+    requires_batch = <span class="kw">True</span>
+
+    <span class="kw">def</span> <span class="fn">execute_batch</span>(<span class="var">self</span>, results: <span class="fn">List</span>[<span class="fn">AnalysisResult</span>],
+                       client: <span class="fn">LLMClient</span>) -> <span class="fn">AnomalyReport</span>: ...
+
+SYSTEM_PROMPT = <span class="str">"""You are an audio quality control specialist. Review batch analysis
+results and flag: DC offset indicators (very low spectral centroid), clipping
+(near-zero dynamic range), mislabeled files (filename/folder doesn't match content),
+near-duplicates (very similar characteristics), and collection outliers."""</span>
+</code></pre>
+</div>
+
+
+<!-- SECTION 6 -->
+<h2 id="s6"><span class="num">06</span> Analysis Time Estimator Design</h2>
+
+<p>The <code>AnalysisTimeEstimator</code> provides pre-scan cost/time estimation and runtime progress tracking. It runs <strong>before</strong> any analysis begins, quickly scanning file headers without audio decoding.</p>
+
+<div class="card">
+<h4>Pre-Scan Phase</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">FileMetaQuick</span>:
+    <span class="str">"""Metadata extracted from file headers without full decode."""</span>
+    path: <span class="fn">Path</span>
+    file_size_bytes: <span class="fn">int</span>
+    duration_estimate: <span class="fn">float</span>       <span class="cm"># seconds, from header metadata</span>
+    format: <span class="fn">str</span>                    <span class="cm"># wav/mp3/flac/aiff</span>
+    channels: <span class="fn">int</span>
+    sample_rate: <span class="fn">int</span>
+
+<span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">PreScanResult</span>:
+    files: <span class="fn">List</span>[<span class="fn">FileMetaQuick</span>]
+    total_count: <span class="fn">int</span>
+    total_duration: <span class="fn">float</span>          <span class="cm"># sum of estimated durations</span>
+    total_size_bytes: <span class="fn">int</span>
+    format_distribution: <span class="fn">Dict</span>[<span class="fn">str</span>, <span class="fn">int</span>]
+    long_files: <span class="fn">List</span>[<span class="fn">Path</span>]         <span class="cm"># files &gt; 30s</span>
+    scan_time: <span class="fn">float</span>               <span class="cm"># how long pre-scan took</span>
+</code></pre>
+</div>
+
+<div class="card">
+<h4>Time &amp; Cost Estimation Model</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">TimeEstimate</span>:
+    estimated_total_seconds: <span class="fn">float</span>
+    estimated_per_file_seconds: <span class="fn">float</span>
+    estimated_api_cost_usd: <span class="fn">float</span>
+    estimated_tokens: <span class="fn">int</span>
+    file_count: <span class="fn">int</span>
+    enabled_features: <span class="fn">List</span>[<span class="fn">str</span>]
+    warnings: <span class="fn">List</span>[<span class="fn">str</span>]            <span class="cm"># human-readable warning messages</span>
+    exceeds_time_threshold: <span class="fn">bool</span>
+    exceeds_cost_threshold: <span class="fn">bool</span>
+    breakdown: <span class="fn">Dict</span>[<span class="fn">str</span>, <span class="fn">float</span>]    <span class="cm"># per-analyzer time estimates</span>
+
+<span class="kw">class</span> <span class="fn">AnalysisTimeEstimator</span>:
+    <span class="cm"># Empirical benchmarks (seconds per second of audio)</span>
+    BASE_RATES = {
+        <span class="str">"source"</span>:     <span class="num-lit">0.15</span>,   <span class="cm"># YAMNet inference</span>
+        <span class="str">"musical"</span>:    <span class="num-lit">0.08</span>,   <span class="cm"># librosa pitch/key</span>
+        <span class="str">"percussive"</span>: <span class="num-lit">0.05</span>,   <span class="cm"># random forest</span>
+        <span class="str">"rhythmic"</span>:   <span class="num-lit">0.06</span>,   <span class="cm"># librosa tempo/beat</span>
+        <span class="str">"speech"</span>:     <span class="num-lit">0.80</span>,   <span class="cm"># Whisper base model</span>
+        <span class="str">"llm"</span>:        <span class="num-lit">2.50</span>,   <span class="cm"># API call latency (fixed per file)</span>
+    }
+
+    FEATURE_RATES = {  <span class="cm"># additional seconds per API call</span>
+        <span class="str">"pack_curator"</span>:     <span class="num-lit">5.0</span>,  <span class="cm"># one batch call</span>
+        <span class="str">"nl_search"</span>:        <span class="num-lit">3.0</span>,  <span class="cm"># per search query</span>
+        <span class="str">"daw_suggestions"</span>:  <span class="num-lit">4.0</span>,  <span class="cm"># one batch call</span>
+        <span class="str">"batch_renamer"</span>:    <span class="num-lit">4.0</span>,  <span class="cm"># one batch call</span>
+        <span class="str">"production_notes"</span>: <span class="num-lit">2.5</span>,  <span class="cm"># per file</span>
+        <span class="str">"spoken_content"</span>:   <span class="num-lit">2.5</span>,  <span class="cm"># per file (speech only)</span>
+        <span class="str">"similar_finder"</span>:   <span class="num-lit">3.5</span>,  <span class="cm"># per query</span>
+        <span class="str">"chain_suggester"</span>:  <span class="num-lit">4.0</span>,  <span class="cm"># one batch call</span>
+        <span class="str">"marketplace_gen"</span>:  <span class="num-lit">5.0</span>,  <span class="cm"># one batch call</span>
+        <span class="str">"anomaly_reporter"</span>: <span class="num-lit">4.0</span>,  <span class="cm"># one batch call</span>
+    }
+
+    TOKEN_ESTIMATES = {  <span class="cm"># per invocation</span>
+        <span class="str">"pack_curator"</span>:     <span class="num-lit">5000</span>,
+        <span class="str">"nl_search"</span>:        <span class="num-lit">3000</span>,
+        <span class="str">"daw_suggestions"</span>:  <span class="num-lit">4000</span>,
+        <span class="str">"batch_renamer"</span>:    <span class="num-lit">3500</span>,
+        <span class="str">"production_notes"</span>: <span class="num-lit">1500</span>,
+        <span class="str">"spoken_content"</span>:   <span class="num-lit">1200</span>,
+        <span class="str">"similar_finder"</span>:   <span class="num-lit">3000</span>,
+        <span class="str">"chain_suggester"</span>:  <span class="num-lit">3500</span>,
+        <span class="str">"marketplace_gen"</span>:  <span class="num-lit">4000</span>,
+        <span class="str">"anomaly_reporter"</span>: <span class="num-lit">4000</span>,
+    }
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, config: <span class="fn">Dict</span>,
+                 time_threshold: <span class="fn">float</span> = <span class="num-lit">300.0</span>,   <span class="cm"># 5 minutes</span>
+                 cost_threshold: <span class="fn">float</span> = <span class="num-lit">1.00</span>,    <span class="cm"># $1.00</span>
+                 max_batch_warning: <span class="fn">int</span> = <span class="num-lit">50</span>) -> <span class="kw">None</span>: ...
+
+    <span class="kw">def</span> <span class="fn">pre_scan</span>(<span class="var">self</span>, paths: <span class="fn">List</span>[<span class="fn">Path</span>]) -> <span class="fn">PreScanResult</span>:
+        <span class="str">"""Fast header-only scan. No audio decoding."""</span>
+        ...
+
+    <span class="kw">def</span> <span class="fn">estimate</span>(<span class="var">self</span>, scan: <span class="fn">PreScanResult</span>,
+                  enabled_analyzers: <span class="fn">List</span>[<span class="fn">str</span>],
+                  enabled_features: <span class="fn">List</span>[<span class="fn">str</span>],
+                  max_workers: <span class="fn">int</span> = <span class="num-lit">4</span>) -> <span class="fn">TimeEstimate</span>:
+        <span class="str">"""Compute time/cost estimate from pre-scan data."""</span>
+        <span class="cm"># Base analysis time (parallelized)</span>
+        base_time = scan.total_duration * max(
+            <span class="var">self</span>.BASE_RATES.get(a, <span class="num-lit">0</span>) <span class="kw">for</span> a <span class="kw">in</span> enabled_analyzers
+        )
+        parallel_factor = min(max_workers, scan.total_count)
+        base_time /= max(parallel_factor, <span class="num-lit">1</span>)
+
+        <span class="cm"># Feature time</span>
+        feature_time = <span class="num-lit">0.0</span>
+        <span class="kw">for</span> f <span class="kw">in</span> enabled_features:
+            rate = <span class="var">self</span>.FEATURE_RATES.get(f, <span class="num-lit">2.5</span>)
+            <span class="kw">if</span> f <span class="kw">in</span> (<span class="str">"production_notes"</span>, <span class="str">"spoken_content"</span>):
+                feature_time += rate * scan.total_count
+            <span class="kw">else</span>:
+                feature_time += rate  <span class="cm"># batch = single call</span>
+
+        <span class="cm"># Token/cost estimation</span>
+        total_tokens = sum(
+            <span class="var">self</span>.TOKEN_ESTIMATES.get(f, <span class="num-lit">2000</span>)
+            * (scan.total_count <span class="kw">if</span> f <span class="kw">in</span> (<span class="str">"production_notes"</span>, <span class="str">"spoken_content"</span>) <span class="kw">else</span> <span class="num-lit">1</span>)
+            <span class="kw">for</span> f <span class="kw">in</span> enabled_features
+        )
+        cost = total_tokens * <span class="num-lit">0.0000025</span>  <span class="cm"># ~$2.50/M tokens (Llama-3.3-70B)</span>
+        ...
+</code></pre>
+</div>
+
+<div class="card">
+<h4>Warning System</h4>
+<p>Warnings are generated when:</p>
+<ul>
+  <li>Estimated time exceeds configurable threshold (default 5 minutes)</li>
+  <li>Any single file exceeds 30 seconds duration</li>
+  <li>LLM API cost exceeds configurable dollar threshold (default $1.00)</li>
+  <li>Batch contains more than N files with LLM features enabled (default 50)</li>
+</ul>
+<p>In the GUI, a modal dialog shows: estimated time, estimated cost, file count, and three buttons: <strong>Proceed</strong>, <strong>Skip LLM Features</strong>, <strong>Cancel</strong>. In CLI, a confirmation prompt with the same information.</p>
+</div>
+
+<div class="card">
+<h4>Progress Tracking (Observer Pattern)</h4>
+<pre><code><span class="kw">class</span> <span class="fn">ProgressEvent</span>:
+    event_type: <span class="fn">str</span>    <span class="cm"># "file_start"|"file_done"|"feature_start"|"feature_done"|"batch_done"</span>
+    file_path: <span class="fn">Optional</span>[<span class="fn">str</span>]
+    feature_name: <span class="fn">Optional</span>[<span class="fn">str</span>]
+    files_completed: <span class="fn">int</span>
+    files_total: <span class="fn">int</span>
+    elapsed_seconds: <span class="fn">float</span>
+    estimated_remaining: <span class="fn">float</span>
+
+<span class="kw">class</span> <span class="fn">ProgressListener</span>(<span class="fn">Protocol</span>):
+    <span class="kw">def</span> <span class="fn">on_progress</span>(<span class="var">self</span>, event: <span class="fn">ProgressEvent</span>) -> <span class="kw">None</span>: ...
+
+<span class="kw">class</span> <span class="fn">ProgressTracker</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>) -> <span class="kw">None</span>:
+        <span class="var">self</span>._listeners: <span class="fn">List</span>[<span class="fn">ProgressListener</span>] = []
+        <span class="var">self</span>._start_time: <span class="fn">Optional</span>[<span class="fn">float</span>] = <span class="kw">None</span>
+        <span class="var">self</span>._lock = <span class="fn">threading</span>.RLock()
+
+    <span class="kw">def</span> <span class="fn">subscribe</span>(<span class="var">self</span>, listener: <span class="fn">ProgressListener</span>) -> <span class="kw">None</span>:
+        <span class="var">self</span>._listeners.append(listener)
+
+    <span class="kw">def</span> <span class="fn">update</span>(<span class="var">self</span>, event: <span class="fn">ProgressEvent</span>) -> <span class="kw">None</span>:
+        <span class="kw">with</span> <span class="var">self</span>._lock:
+            <span class="kw">for</span> listener <span class="kw">in</span> <span class="var">self</span>._listeners:
+                listener.on_progress(event)
+</code></pre>
+</div>
+
+<!-- SECTION 7 -->
+<h2 id="s7"><span class="num">07</span> Data Model Changes</h2>
+
+<div class="card">
+<h4>New Top-Level Result Container</h4>
+<pre><code><span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">FeatureResults</span>:
+    <span class="str">"""Aggregated results from all LLM features for a single file or batch."""</span>
+    production_notes: <span class="fn">Optional</span>[<span class="fn">ProductionNotes</span>] = <span class="kw">None</span>
+    spoken_content: <span class="fn">Optional</span>[<span class="fn">SpokenContentResult</span>] = <span class="kw">None</span>
+    similar_samples: <span class="fn">Optional</span>[<span class="fn">SimilarityResult</span>] = <span class="kw">None</span>
+
+<span class="kw">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">BatchFeatureResults</span>:
+    <span class="str">"""Results from batch-level features."""</span>
+    pack_curation: <span class="fn">Optional</span>[<span class="fn">PackCurationResult</span>] = <span class="kw">None</span>
+    rename_preview: <span class="fn">Optional</span>[<span class="fn">RenameResult</span>] = <span class="kw">None</span>
+    daw_suggestions: <span class="fn">Optional</span>[<span class="fn">SuggestionResult</span>] = <span class="kw">None</span>
+    chain_suggestion: <span class="fn">Optional</span>[<span class="fn">ChainResult</span>] = <span class="kw">None</span>
+    marketplace_copy: <span class="fn">Optional</span>[<span class="fn">MarketplaceResult</span>] = <span class="kw">None</span>
+    anomaly_report: <span class="fn">Optional</span>[<span class="fn">AnomalyReport</span>] = <span class="kw">None</span>
+    search_results: <span class="fn">Optional</span>[<span class="fn">SearchResult</span>] = <span class="kw">None</span>
+</code></pre>
+<p>The existing <code>AnalysisResult</code> is <strong>not modified</strong>. Feature results are stored separately in the <code>LLMFeatureManager</code> and returned alongside the original results. Serialization uses <code>to_dict()</code> methods on each feature result, aggregated into a <code>"llm_features"</code> key in the JSON export.</p>
+</div>
+
+<!-- SECTION 8 -->
+<h2 id="s8"><span class="num">08</span> Configuration Schema</h2>
+
+<div class="card">
+<h4>Additions to config.yaml</h4>
+<pre><code><span class="cm"># ── LLM Feature Expansion ──</span>
+llm_features:
+  enabled: <span class="kw">true</span>
+
+  <span class="cm"># Shared LLM client settings</span>
+  client:
+    provider: togetherai          <span class="cm"># togetherai | openai</span>
+    model: meta-llama/Llama-3.3-70B-Instruct-Turbo
+    temperature: <span class="num-lit">0.4</span>
+    max_tokens: <span class="num-lit">2000</span>
+    rate_limit_rpm: <span class="num-lit">60</span>           <span class="cm"># requests per minute</span>
+    retry_max: <span class="num-lit">3</span>
+    retry_backoff_base: <span class="num-lit">2.0</span>
+
+  <span class="cm"># Time/cost estimation</span>
+  estimator:
+    time_warning_threshold: <span class="num-lit">300</span>  <span class="cm"># seconds (5 min)</span>
+    cost_warning_threshold: <span class="num-lit">1.00</span> <span class="cm"># USD</span>
+    max_batch_warning: <span class="num-lit">50</span>        <span class="cm"># file count trigger</span>
+
+  <span class="cm"># Response caching</span>
+  cache:
+    enabled: <span class="kw">true</span>
+    ttl: <span class="num-lit">86400</span>                    <span class="cm"># 24 hours (LLM responses change less)</span>
+    max_entries: <span class="num-lit">5000</span>
+
+  <span class="cm"># Per-feature toggles and settings</span>
+  features:
+    pack_curator:
+      enabled: <span class="kw">true</span>
+      max_packs: <span class="num-lit">10</span>
+      min_samples_per_pack: <span class="num-lit">3</span>
+
+    nl_search:
+      enabled: <span class="kw">true</span>
+      max_results: <span class="num-lit">20</span>
+
+    daw_suggestions:
+      enabled: <span class="kw">true</span>
+
+    batch_renamer:
+      enabled: <span class="kw">true</span>
+      default_template: standard  <span class="cm"># standard | minimal | full</span>
+
+    production_notes:
+      enabled: <span class="kw">true</span>
+
+    spoken_content:
+      enabled: <span class="kw">true</span>
+
+    similar_finder:
+      enabled: <span class="kw">true</span>
+      default_top_k: <span class="num-lit">10</span>
+
+    chain_suggester:
+      enabled: <span class="kw">true</span>
+      default_energy: ascending   <span class="cm"># ascending | descending | arc | flat</span>
+
+    marketplace_gen:
+      enabled: <span class="kw">true</span>
+      default_platforms:
+        - splice
+        - loopmasters
+
+    anomaly_reporter:
+      enabled: <span class="kw">true</span>
+</code></pre>
+</div>
+
+<!-- SECTION 9 -->
+<h2 id="s9"><span class="num">09</span> LLM Client Optimization</h2>
+
+<div class="two-col">
+<div class="card">
+<h4>Connection Pooling</h4>
+<p>A single <code>LLMClient</code> instance is shared across all features via the <code>LLMFeatureManager</code>. The client wraps the OpenAI SDK and maintains a persistent HTTP session for connection reuse. This avoids per-request TLS handshake overhead.</p>
+<pre><code><span class="kw">class</span> <span class="fn">LLMClient</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, config: <span class="fn">Dict</span>):
+        <span class="var">self</span>._client = <span class="fn">OpenAI</span>(
+            api_key=config[<span class="str">"api_key"</span>],
+            base_url=config.get(<span class="str">"base_url"</span>),
+        )
+        <span class="var">self</span>._rate_limiter = <span class="fn">RateLimiter</span>(
+            config.get(<span class="str">"rate_limit_rpm"</span>, <span class="num-lit">60</span>))
+        <span class="var">self</span>._cache = <span class="fn">ResponseCache</span>(
+            config.get(<span class="str">"cache"</span>, {}))
+
+    <span class="kw">def</span> <span class="fn">complete</span>(<span class="var">self</span>, prompt: <span class="fn">str</span>,
+                  system: <span class="fn">str</span> = <span class="str">""</span>,
+                  temperature: <span class="fn">float</span> = <span class="num-lit">0.4</span>,
+                  max_tokens: <span class="fn">int</span> = <span class="num-lit">2000</span>) -> <span class="fn">str</span>:
+        cache_key = <span class="var">self</span>._cache.key(
+            system, prompt, temperature)
+        <span class="kw">if</span> cached := <span class="var">self</span>._cache.get(cache_key):
+            <span class="kw">return</span> cached
+        <span class="var">self</span>._rate_limiter.wait()
+        response = <span class="var">self</span>._call_with_retry(
+            system, prompt, temperature, max_tokens)
+        <span class="var">self</span>._cache.set(cache_key, response)
+        <span class="kw">return</span> response
+</code></pre>
+</div>
+<div class="card">
+<h4>Retry &amp; Rate Limiting</h4>
+<pre><code><span class="kw">class</span> <span class="fn">RateLimiter</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, rpm: <span class="fn">int</span>):
+        <span class="var">self</span>._min_interval = <span class="num-lit">60.0</span> / rpm
+        <span class="var">self</span>._last_call = <span class="num-lit">0.0</span>
+        <span class="var">self</span>._lock = <span class="fn">threading</span>.Lock()
+
+    <span class="kw">def</span> <span class="fn">wait</span>(<span class="var">self</span>) -> <span class="kw">None</span>:
+        <span class="kw">with</span> <span class="var">self</span>._lock:
+            elapsed = time.time() - <span class="var">self</span>._last_call
+            <span class="kw">if</span> elapsed &lt; <span class="var">self</span>._min_interval:
+                time.sleep(<span class="var">self</span>._min_interval - elapsed)
+            <span class="var">self</span>._last_call = time.time()
+</code></pre>
+
+<h4 style="margin-top:20px">Exponential Backoff</h4>
+<pre><code><span class="kw">def</span> <span class="fn">_call_with_retry</span>(<span class="var">self</span>, ...) -> <span class="fn">str</span>:
+    <span class="kw">for</span> attempt <span class="kw">in</span> range(<span class="var">self</span>._max_retries):
+        <span class="kw">try</span>:
+            <span class="kw">return</span> <span class="var">self</span>._raw_call(...)
+        <span class="kw">except</span> (<span class="fn">RateLimitError</span>, <span class="fn">APITimeoutError</span>):
+            delay = (<span class="var">self</span>._backoff_base ** attempt
+                     + random.uniform(<span class="num-lit">0</span>, <span class="num-lit">1</span>))
+            time.sleep(delay)
+    <span class="kw">raise</span> <span class="fn">LLMFeatureError</span>(<span class="str">"Max retries exceeded"</span>)
+</code></pre>
+</div>
+</div>
+
+<div class="card">
+<h4>Response Caching</h4>
+<p>LLM responses are cached by a SHA-256 hash of <code>(system_prompt, user_prompt, temperature)</code>. Cache is thread-safe with RLock, TTL-based expiry (default 24h), and stored in-memory with configurable max entries. This prevents duplicate API calls when the same analysis is re-run or when multiple features share similar context.</p>
+</div>
+
+<!-- SECTION 10 -->
+<h2 id="s10"><span class="num">10</span> Concurrency &amp; Pipeline Design</h2>
+
+<p>New features integrate with the existing <code>ThreadPoolExecutor(max_workers=4)</code>. The pipeline has three distinct phases:</p>
+
+<div class="diagram">
+<span class="hl">Phase 1: Core Analysis</span> (existing, parallelized)
+┌─────────────────────────────────────────────┐
+│  ThreadPoolExecutor(max_workers=4)          │
+│  ├── YAMNet Source         ─┐               │
+│  ├── Librosa Musical        ├── parallel    │
+│  ├── RF Percussive          │               │
+│  ├── Librosa Rhythmic      ─┘               │
+│  └── Whisper Speech        ── parallel      │
+│       └── LLM Analyzer     ── sequential    │
+└─────────────────────────────────────────────┘
+                    │
+                    ▼ List[AnalysisResult]
+<span class="hl">Phase 2: Single-File Features</span> (new, parallelized per file)
+┌─────────────────────────────────────────────┐
+│  ThreadPoolExecutor(max_workers=4)          │
+│  For each AnalysisResult:                   │
+│  ├── ProductionNotes       ─┐               │
+│  ├── SpokenContent          ├── parallel    │
+│  └── SimilarFinder         ─┘  (per file)  │
+└─────────────────────────────────────────────┘
+                    │
+                    ▼ FeatureResults per file
+<span class="hl">Phase 3: Batch Features</span> (new, sequential — each is one API call)
+┌─────────────────────────────────────────────┐
+│  Sequential execution (rate-limited):       │
+│  1. PackCurator                             │
+│  2. BatchRenamer                            │
+│  3. DAWContextSuggester                     │
+│  4. ChainSuggester                          │
+│  5. MarketplaceDescriptionGen               │
+│  6. AnomalyReporter                         │
+│  (NLSearch runs on-demand, not in pipeline) │
+└─────────────────────────────────────────────┘
+</div>
+
+<p>Single-file features run in parallel across files (bounded by max_workers). Batch features run sequentially because each makes one API call with all results — parallelizing them would exceed rate limits without meaningful speedup.</p>
+
+<!-- SECTION 11 -->
+<h2 id="s11"><span class="num">11</span> GUI Integration</h2>
+
+<div class="two-col">
+<div class="card">
+<h4>LLM Features Panel</h4>
+<p>New expandable panel in the left sidebar below the existing file management panel. Contains:</p>
+<ul>
+  <li>Master toggle: "Enable LLM Features"</li>
+  <li>Per-feature checkboxes with tooltips</li>
+  <li>DAW context inputs (BPM, Key, Genre, Mood dropdowns)</li>
+  <li>Naming template dropdown for batch rename</li>
+  <li>"Estimate Cost" button to run pre-scan without analysis</li>
+</ul>
+</div>
+<div class="card">
+<h4>Smart Search Bar</h4>
+<p>New search bar positioned above the results table. Styled with JackStyle:</p>
+<ul>
+  <li>Background: <code>#2d2d2d</code>, border: <code>#404040</code></li>
+  <li>Placeholder: "Search samples naturally..."</li>
+  <li>Real-time results ranking with relevance scores</li>
+  <li>Results highlighted in the existing table</li>
+</ul>
+</div>
+</div>
+
+<div class="two-col">
+<div class="card">
+<h4>Progress Dialog</h4>
+<p>Modal dialog shown during feature execution. Displays:</p>
+<ul>
+  <li>Overall progress bar with percentage</li>
+  <li>Current file / feature being processed</li>
+  <li>Elapsed time and estimated remaining</li>
+  <li>Running cost tally</li>
+  <li>Cancel button</li>
+</ul>
+</div>
+<div class="card">
+<h4>Feature Results Display</h4>
+<p>Expandable sections below each file's analysis results:</p>
+<ul>
+  <li>Production Notes: styled card with EQ/mixing/FX tips</li>
+  <li>Spoken Content: sentiment gauge, content warning badges</li>
+  <li>Batch results: separate tabbed panel (Packs, Rename Preview, Chain, etc.)</li>
+</ul>
+</div>
+</div>
+
+<!-- SECTION 12 -->
+<h2 id="s12"><span class="num">12</span> CLI Integration</h2>
+
+<div class="card">
+<h4>New Click Commands &amp; Flags</h4>
+<pre><code><span class="cm"># New subcommands under main CLI</span>
+
+samplecharm analyze &lt;files&gt; --features pack_curator,production_notes
+samplecharm analyze &lt;files&gt; --all-features
+samplecharm analyze &lt;files&gt; --estimate-only     <span class="cm"># pre-scan, print estimate, exit</span>
+
+samplecharm search <span class="str">"bright snare 130bpm"</span> --dir ./samples
+samplecharm search <span class="str">"dark pad"</span> --results-file results.json
+
+samplecharm curate --dir ./samples --output-dir ./packs --dry-run
+samplecharm curate --apply                       <span class="cm"># actually copy files</span>
+
+samplecharm rename --dir ./samples --template standard --dry-run
+samplecharm rename --apply
+
+samplecharm suggest --bpm <span class="num-lit">128</span> --key <span class="str">"C minor"</span> --genre <span class="str">"techno"</span> --dir ./samples
+
+samplecharm chain --dir ./samples --energy ascending
+
+samplecharm marketplace --dir ./samples --name <span class="str">"My Pack"</span> --platform splice
+
+samplecharm quality-check --dir ./samples        <span class="cm"># anomaly reporter</span>
+
+<span class="cm"># Global flags</span>
+--no-llm-features     <span class="cm"># disable all new features</span>
+--cost-limit <span class="num-lit">0.50</span>     <span class="cm"># abort if estimated cost exceeds limit</span>
+--skip-estimate       <span class="cm"># skip pre-scan confirmation</span>
+--output-format json|text|html
+</code></pre>
+</div>
+
+<!-- SECTION 13 -->
+<h2 id="s13"><span class="num">13</span> Testing Strategy</h2>
+
+<div class="two-col">
+<div class="card">
+<h4>Unit Tests</h4>
+<ul>
+  <li><strong>Mock LLM client</strong>: <code>MockLLMClient</code> returns deterministic JSON responses for each feature</li>
+  <li><strong>Prompt validation</strong>: Assert prompts contain required fields, sample data, and format instructions</li>
+  <li><strong>Response parsing</strong>: Test <code>_parse_response()</code> with valid JSON, malformed JSON, missing fields, and empty responses</li>
+  <li><strong>Dataclass validation</strong>: Ensure all output dataclasses are correctly frozen, serializable, and handle edge cases</li>
+  <li><strong>Estimator accuracy</strong>: Test pre-scan with various file formats, estimate calculations with different feature combinations</li>
+  <li><strong>Progress tracker</strong>: Test Observer subscription, event dispatch, and thread safety</li>
+</ul>
+</div>
+<div class="card">
+<h4>Integration Tests</h4>
+<ul>
+  <li><strong>End-to-end pipeline</strong>: Analyze 5-10 real audio files, run all features, verify output structure</li>
+  <li><strong>Feature manager lifecycle</strong>: Test feature discovery, execution ordering, error isolation</li>
+  <li><strong>GUI integration</strong>: Verify feature toggle state propagates to manager config</li>
+  <li><strong>CLI commands</strong>: Test each new subcommand with mock data</li>
+  <li><strong>Rate limiting</strong>: Verify rate limiter correctly throttles concurrent requests</li>
+  <li><strong>Cache behavior</strong>: Test cache hits, misses, TTL expiry, and thread safety</li>
+</ul>
+</div>
+</div>
+
+<div class="card">
+<h4>Mock LLM Response Example</h4>
+<pre><code>MOCK_PACK_CURATION_RESPONSE = <span class="str">"""{
+    "packs": [
+        {
+            "name": "Lo-Fi Dusty Drums",
+            "description": "Warm, vinyl-textured drum hits",
+            "tags": ["lo-fi", "vinyl", "drums", "hip-hop"],
+            "sample_ids": ["abc123", "def456", "ghi789"],
+            "confidence": 0.85
+        }
+    ],
+    "uncategorized": ["xyz999"]
+}"""</span>
+
+<span class="kw">class</span> <span class="fn">MockLLMClient</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, responses: <span class="fn">Dict</span>[<span class="fn">str</span>, <span class="fn">str</span>]):
+        <span class="var">self</span>._responses = responses
+        <span class="var">self</span>.call_count = <span class="num-lit">0</span>
+
+    <span class="kw">def</span> <span class="fn">complete</span>(<span class="var">self</span>, prompt: <span class="fn">str</span>, **kwargs) -> <span class="fn">str</span>:
+        <span class="var">self</span>.call_count += <span class="num-lit">1</span>
+        <span class="kw">for</span> key, response <span class="kw">in</span> <span class="var">self</span>._responses.items():
+            <span class="kw">if</span> key <span class="kw">in</span> prompt:
+                <span class="kw">return</span> response
+        <span class="kw">return</span> <span class="str">"{}"</span>
+</code></pre>
+</div>
+
+<!-- SECTION 14 -->
+<h2 id="s14"><span class="num">14</span> Migration &amp; Backwards Compatibility</h2>
+
+<div class="card">
+<h4>Design Principles</h4>
+<ul>
+  <li><strong>Zero existing code changes</strong>: The <code>LLMFeatureManager</code> consumes <code>AnalysisResult</code> objects produced by the existing pipeline. No modifications to <code>AudioAnalysisEngine</code>, analyzers, or data models.</li>
+  <li><strong>Feature flags</strong>: Every feature has an independent <code>enabled: true/false</code> toggle in config. The master <code>llm_features.enabled</code> flag disables all features at once.</li>
+  <li><strong>Graceful degradation</strong>: If the LLM client is unavailable (no API key, network error), all features fail silently and return <code>None</code>. The core analysis pipeline completes normally.</li>
+  <li><strong>Optional dependency</strong>: The <code>llm_features</code> module can be imported conditionally. If not installed, the application runs exactly as before.</li>
+  <li><strong>Configuration defaults</strong>: Missing config keys fall back to sensible defaults. An existing <code>config.yaml</code> without the <code>llm_features</code> section simply disables all features.</li>
+  <li><strong>Serialization</strong>: Feature results serialize to a separate <code>"llm_features"</code> key in JSON output. Existing JSON consumers see no changes to the root-level keys.</li>
+</ul>
+</div>
+
+<div class="card">
+<h4>Risks &amp; Mitigations</h4>
+<table>
+<tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
+<tr><td>LLM hallucination (incorrect pack groupings, wrong key compatibility)</td><td>Medium</td><td>Confidence scores on all outputs; UI shows confidence badges; user review before applying actions (rename, file copy)</td></tr>
+<tr><td>API latency spikes (10s+ responses)</td><td>Medium</td><td>Configurable timeouts per feature; progress tracker shows elapsed time; cancel button in GUI</td></tr>
+<tr><td>Cost overruns (large batches with many features)</td><td>High</td><td>Pre-scan estimator with cost warning dialog; configurable cost limits; <code>--cost-limit</code> CLI flag</td></tr>
+<tr><td>Rate limiting (429 errors)</td><td>Low</td><td>Client-side rate limiter; exponential backoff with jitter; configurable RPM limit</td></tr>
+<tr><td>Provider outage</td><td>Medium</td><td>Fallback provider support (TogetherAI → OpenAI); cached responses survive outages; graceful <code>None</code> returns</td></tr>
+<tr><td>Prompt injection via filenames</td><td>Low</td><td>Sanitize file paths and names before including in prompts; treat all file metadata as untrusted input</td></tr>
+</table>
+</div>
+
+<!-- SECTION 15 -->
+<h2 id="s15"><span class="num">15</span> Cost &amp; Performance Summary</h2>
+
+<div class="card">
+<table>
+<tr>
+  <th>Feature</th>
+  <th>Type</th>
+  <th>Est. Tokens / Call</th>
+  <th>Cost / File (Llama-3.3)</th>
+  <th>Cost / 100 Files</th>
+  <th>Latency</th>
+</tr>
+<tr>
+  <td>Smart Pack Curator</td>
+  <td>Batch</td>
+  <td>~5,000</td>
+  <td>N/A (batch)</td>
+  <td>~$0.013</td>
+  <td>3–8s</td>
+</tr>
+<tr>
+  <td>NL Sample Search</td>
+  <td>On-demand</td>
+  <td>~3,000</td>
+  <td>N/A (per query)</td>
+  <td>~$0.008/query</td>
+  <td>2–5s</td>
+</tr>
+<tr>
+  <td>DAW Suggestions</td>
+  <td>Batch</td>
+  <td>~4,000</td>
+  <td>N/A (batch)</td>
+  <td>~$0.010</td>
+  <td>3–6s</td>
+</tr>
+<tr>
+  <td>Batch Rename</td>
+  <td>Batch</td>
+  <td>~3,500</td>
+  <td>N/A (batch)</td>
+  <td>~$0.009</td>
+  <td>3–6s</td>
+</tr>
+<tr>
+  <td>Production Notes</td>
+  <td>Single</td>
+  <td>~1,500</td>
+  <td>~$0.004</td>
+  <td>~$0.38</td>
+  <td>2–3s/file</td>
+</tr>
+<tr>
+  <td>Spoken Content</td>
+  <td>Single</td>
+  <td>~1,200</td>
+  <td>~$0.003</td>
+  <td>~$0.30*</td>
+  <td>2–3s/file</td>
+</tr>
+<tr>
+  <td>Similar Finder</td>
+  <td>On-demand</td>
+  <td>~3,000</td>
+  <td>N/A (per query)</td>
+  <td>~$0.008/query</td>
+  <td>3–5s</td>
+</tr>
+<tr>
+  <td>Chain Suggester</td>
+  <td>Batch</td>
+  <td>~3,500</td>
+  <td>N/A (batch)</td>
+  <td>~$0.009</td>
+  <td>3–6s</td>
+</tr>
+<tr>
+  <td>Marketplace Gen</td>
+  <td>Batch</td>
+  <td>~4,000</td>
+  <td>N/A (batch)</td>
+  <td>~$0.010</td>
+  <td>4–8s</td>
+</tr>
+<tr>
+  <td>Anomaly Reporter</td>
+  <td>Batch</td>
+  <td>~4,000</td>
+  <td>N/A (batch)</td>
+  <td>~$0.010</td>
+  <td>3–6s</td>
+</tr>
+<tr style="border-top:2px solid var(--accent-red);font-weight:bold">
+  <td colspan="2">Total (all features, 100 files)</td>
+  <td>~40,000</td>
+  <td>—</td>
+  <td>~$0.75</td>
+  <td>~5–8 min</td>
+</tr>
+</table>
+<p style="font-size:12px;color:var(--text-dim)">* Spoken Content cost assumes ~50% of files contain speech. Pricing based on TogetherAI Llama-3.3-70B at ~$0.0025/1K tokens. OpenAI gpt-4o-mini costs approximately 4× more.</p>
+</div>
+
+<!-- Usage Example -->
+<h2><span class="num">★</span> Usage Example</h2>
+
+<div class="card">
+<h4>Integration with Existing Engine</h4>
+<pre><code><span class="kw">from</span> src.core.engine <span class="kw">import</span> create_analysis_engine
+<span class="kw">from</span> src.features.manager <span class="kw">import</span> LLMFeatureManager
+<span class="kw">from</span> src.features.client <span class="kw">import</span> LLMClient
+<span class="kw">from</span> src.features.estimator <span class="kw">import</span> AnalysisTimeEstimator
+<span class="kw">from</span> src.utils.config <span class="kw">import</span> load_config
+
+config = load_config(<span class="str">"config/config.yaml"</span>)
+
+<span class="cm"># Existing pipeline</span>
+engine = create_analysis_engine(config)
+
+<span class="cm"># New feature layer</span>
+client = LLMClient(config[<span class="str">"llm_features"</span>][<span class="str">"client"</span>])
+estimator = AnalysisTimeEstimator(config[<span class="str">"llm_features"</span>][<span class="str">"estimator"</span>])
+manager = LLMFeatureManager.from_config(
+    config[<span class="str">"llm_features"</span>], client, estimator)
+
+<span class="cm"># Pre-scan and estimate</span>
+files = [Path(<span class="str">"samples/kick_01.wav"</span>), Path(<span class="str">"samples/snare_02.wav"</span>), ...]
+scan = estimator.pre_scan(files)
+estimate = estimator.estimate(scan, [<span class="str">"source"</span>, <span class="str">"musical"</span>, <span class="str">"llm"</span>],
+                               [<span class="str">"pack_curator"</span>, <span class="str">"production_notes"</span>])
+print(f<span class="str">"Est. time: {estimate.estimated_total_seconds:.0f}s"</span>)
+print(f<span class="str">"Est. cost: ${estimate.estimated_api_cost_usd:.3f}"</span>)
+
+<span class="cm"># Run core analysis</span>
+results = engine.analyze_batch([<span class="fn">str</span>(f) <span class="kw">for</span> f <span class="kw">in</span> files])
+
+<span class="cm"># Run single-file features</span>
+<span class="kw">for</span> result <span class="kw">in</span> results:
+    <span class="kw">if</span> result:
+        feature_results = manager.run_single_features(result)
+
+<span class="cm"># Run batch features</span>
+valid_results = [r <span class="kw">for</span> r <span class="kw">in</span> results <span class="kw">if</span> r <span class="kw">is not</span> <span class="kw">None</span>]
+batch_results = manager.run_batch_features(valid_results)
+</code></pre>
+</div>
+
+<div class="footer">
+  SampleCharm — LLM Feature Expansion: Technical Design Document — v1.0 — January 2026
+</div>
+
+</div><!-- /container -->
+</body>
+</html>
