@@ -75,11 +75,23 @@ class ProductionNotesGenerator(BaseLLMFeature):
                 max_tokens=1500,
             )
             data = parse_json_response(raw)
-        except Exception:
-            self.logger.warning("LLM call or JSON parse failed for production_notes, returning empty result")
+        except Exception as exc:
+            self.logger.warning("LLM call failed for production_notes: %s", exc)
             return ProductionNotesResult(
                 sample_hash=result.audio_sample_hash,
-                eq_suggestions=[],
+                eq_suggestions=[f"[LLM error] {exc}"],
+                layering_advice=[],
+                mixing_tips=[],
+                arrangement_placement=[],
+                processing_chain=[],
+                compatible_genres=[],
+            )
+
+        if data.get("_parse_error"):
+            raw_text = data.get("_raw_response", "")[:500]
+            return ProductionNotesResult(
+                sample_hash=result.audio_sample_hash,
+                eq_suggestions=[f"[LLM parse error] {raw_text}"],
                 layering_advice=[],
                 mixing_tips=[],
                 arrangement_placement=[],

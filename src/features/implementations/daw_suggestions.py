@@ -74,9 +74,27 @@ class DAWContextSuggester(BaseLLMFeature):
                 max_tokens=2000,
             )
             data = parse_json_response(raw)
-        except Exception:
-            self.logger.warning("LLM call or JSON parse failed for daw_suggestions, returning empty result")
-            return SuggestionResult(context=context, suggestions=[], layer_groups=[])
+        except Exception as exc:
+            self.logger.warning("LLM call failed for daw_suggestions: %s", exc)
+            error_suggestion = SampleSuggestion(
+                sample_hash="",
+                fit_score=0.0,
+                reason=f"[LLM error] {exc}",
+                conflicts=[],
+                layer_with=[],
+            )
+            return SuggestionResult(context=context, suggestions=[error_suggestion], layer_groups=[])
+
+        if data.get("_parse_error"):
+            raw_text = data.get("_raw_response", "")[:500]
+            error_suggestion = SampleSuggestion(
+                sample_hash="",
+                fit_score=0.0,
+                reason=f"[LLM parse error] {raw_text}",
+                conflicts=[],
+                layer_with=[],
+            )
+            return SuggestionResult(context=context, suggestions=[error_suggestion], layer_groups=[])
 
         if not data:
             return SuggestionResult(context=context, suggestions=[], layer_groups=[])

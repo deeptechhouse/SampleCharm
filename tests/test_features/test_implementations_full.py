@@ -153,14 +153,15 @@ class TestSamplePackCuratorFull:
         assert result.data.packs == []
         assert result.data.uncategorized == []
 
-    def test_invalid_json_returns_empty_result(self, gate):
+    def test_invalid_json_returns_parse_error_result(self, gate):
         client = _make_client("not valid json at all")
         from src.features.implementations.sample_pack_curator import SamplePackCurator
         feature = SamplePackCurator(client=client, gate=gate)
         result = feature.execute([make_mock_result()])
 
         assert isinstance(result.data, PackCurationResult)
-        assert result.data.packs == []
+        # Parse error now surfaces raw text in a visible field
+        assert len(result.data.packs) >= 1
 
     def test_multiple_packs_returned(self, gate):
         response = json.dumps({
@@ -647,11 +648,9 @@ class TestSampleChainSuggesterFull:
         result = feature.execute([make_mock_result("abc123")])
 
         assert isinstance(result.data, ChainResult)
-        # parse_json_response returns {} for invalid JSON, so ordered_hashes
-        # comes from data.get("ordered_hashes", []) which is []
-        assert result.data.ordered_hashes == []
-        assert result.data.transitions == []
+        # parse_json_response now returns _parse_error dict; feature surfaces raw text
         assert result.data.overall_score == 0.0
+        assert "parse error" in (result.data.energy_arc or "").lower() or result.data.ordered_hashes == []
 
 
 # ===========================================================================

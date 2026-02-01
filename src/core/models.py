@@ -382,6 +382,7 @@ class AnalysisResult:
     # Metadata
     analyzer_versions: Dict[str, str] = field(default_factory=dict)
     used_fallback: Dict[str, bool] = field(default_factory=dict)
+    from_cache: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -411,7 +412,8 @@ class AnalysisResult:
                 if self.llm_analysis else None
             ),
             'analyzer_versions': self.analyzer_versions,
-            'used_fallback': self.used_fallback
+            'used_fallback': self.used_fallback,
+            'from_cache': self.from_cache
         }
 
     def to_json(self, indent: int = 2) -> str:

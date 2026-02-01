@@ -79,6 +79,22 @@ class SimilarSampleFinder(BaseLLMFeature):
         # Parse response
         data = parse_json_response(raw)
 
+        if data.get("_parse_error"):
+            raw_text = data.get("_raw_response", "")[:500]
+            self.logger.warning("parse_json_response returned _parse_error for similar_sample_finder")
+            return SimilarityResult(
+                reference_hash=reference_hash,
+                matches=[
+                    SimilarMatch(
+                        sample_hash="",
+                        similarity_score=0.0,
+                        explanation=f"[Parse error] Raw LLM response: {raw_text}",
+                        shared_attributes={},
+                    )
+                ],
+                weighting_strategy="parse_error",
+            )
+
         # Build result with graceful fallback
         try:
             matches = []

@@ -119,26 +119,32 @@ class TestParseJsonResponseMarkdownBlock:
 
 
 class TestParseJsonResponseInvalid:
-    """parse_json_response returns {} for invalid input."""
+    """parse_json_response returns _parse_error dict for invalid input."""
 
     def test_plain_text(self):
-        assert parse_json_response("not json at all") == {}
+        result = parse_json_response("not json at all")
+        assert result.get("_parse_error") is True
+        assert "not json at all" in result.get("_raw_response", "")
 
     def test_partial_json(self):
-        assert parse_json_response('{"a": 1, "b":') == {}
+        result = parse_json_response('{"a": 1, "b":')
+        assert result.get("_parse_error") is True
 
     def test_xml_input(self):
-        assert parse_json_response("<root><a>1</a></root>") == {}
+        result = parse_json_response("<root><a>1</a></root>")
+        assert result.get("_parse_error") is True
 
 
 class TestParseJsonResponseEmpty:
-    """parse_json_response returns {} for empty string."""
+    """parse_json_response returns _parse_error dict for empty string."""
 
     def test_empty_string(self):
-        assert parse_json_response("") == {}
+        result = parse_json_response("")
+        assert result.get("_parse_error") is True
 
     def test_whitespace_only(self):
-        assert parse_json_response("   \n\t  ") == {}
+        result = parse_json_response("   \n\t  ")
+        assert result.get("_parse_error") is True
 
 
 # ---------------------------------------------------------------------------

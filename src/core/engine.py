@@ -101,12 +101,13 @@ class AudioAnalysisEngine:
         self.logger = logging.getLogger('engine')
         self.feature_manager = feature_manager
 
-    def analyze(self, file_path: Path) -> AnalysisResult:
+    def analyze(self, file_path: Path, force: bool = False) -> AnalysisResult:
         """
         Analyze audio file completely.
 
         Args:
             file_path: Path to audio file
+            force: If True, invalidate cache and re-run all analyzers
 
         Returns:
             AnalysisResult: Complete analysis result
@@ -118,10 +119,16 @@ class AudioAnalysisEngine:
         self.logger.info(f"Loading audio: {file_path}")
         audio = self.loader.load(file_path)
 
+        # Step 1b: Force re-analysis — clear cache for this file
+        if force and self.cache:
+            self.cache.delete(audio.file_hash)
+            self.logger.info(f"Force re-analysis: cache cleared for {audio.file_hash[:8]}...")
+
         # Step 2: Check cache
         if self.cache:
             cached_result = self.cache.get(audio.file_hash)
             if cached_result:
+                cached_result.from_cache = True
                 self.logger.info(f"Cache hit: {audio.file_hash[:8]}...")
                 return cached_result
 
@@ -237,11 +244,17 @@ class AudioAnalysisEngine:
                 self.logger.error(f"{name} failed: {e}")
                 results[name] = (None, False)
 
-        # Run LLM analyzer last with speech data (if available)
+        # Run LLM analyzer last with speech data and rhythmic data (if available)
+        rhythmic_result = None
+        rhythmic_tuple = results.get('rhythmic', (None, False))
+        if rhythmic_tuple[0] is not None:
+            rhythmic_result = rhythmic_tuple[0]
+
         if llm_analyzer is not None:
             try:
                 llm_result, llm_fallback = self._run_analyzer(
-                    'llm', llm_analyzer, audio, speech_data
+                    'llm', llm_analyzer, audio, speech_data,
+                    rhythmic_data=rhythmic_result,
                 )
                 results['llm'] = (llm_result, llm_fallback)
                 self.logger.debug(f"llm complete (fallback: {llm_fallback})")
@@ -256,7 +269,8 @@ class AudioAnalysisEngine:
         name: str,
         analyzer: Any,
         audio: AudioSample,
-        speech_data: Optional[dict] = None
+        speech_data: Optional[dict] = None,
+        rhythmic_data: Optional[Any] = None,
     ) -> Tuple[Any, bool]:
         """
         Run single analyzer with error handling.
@@ -266,6 +280,7 @@ class AudioAnalysisEngine:
             analyzer: Analyzer instance
             audio: Audio sample
             speech_data: Optional speech recognition results (for LLM analyzer)
+            rhythmic_data: Optional rhythmic analysis results (for LLM analyzer)
 
         Returns:
             Tuple: (result, used_fallback)
@@ -275,10 +290,14 @@ class AudioAnalysisEngine:
             if hasattr(analyzer, 'analyze') and hasattr(analyzer, 'fallback'):
                 # Returns (result, used_fallback)
                 return analyzer.analyze(audio)
-            elif name == 'llm' and speech_data is not None:
-                # LLM analyzer with speech data enhancement
+            elif name == 'llm':
+                # LLM analyzer — pass speech data and rhythmic data
                 if hasattr(analyzer, '_analyze_impl'):
-                    result = analyzer._analyze_impl(audio, speech_data=speech_data)
+                    result = analyzer._analyze_impl(
+                        audio,
+                        speech_data=speech_data,
+                        rhythmic_data=rhythmic_data,
+                    )
                     return (result, False)
                 else:
                     result = analyzer.analyze(audio)

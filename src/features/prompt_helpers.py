@@ -129,5 +129,5 @@ def parse_json_response(raw: str) -> Dict[str, Any]:
     try:
         return json.loads(cleaned)
     except json.JSONDecodeError:
-        logger.warning("Failed to parse LLM JSON response, returning empty dict")
-        return {}
+        logger.warning("Failed to parse LLM JSON response, preserving raw text")
+        return {"_parse_error": True, "_raw_response": raw}

@@ -69,9 +69,25 @@ class NaturalLanguageSearch(BaseLLMFeature):
                 max_tokens=1500,
             )
             data = parse_json_response(raw)
-        except Exception:
-            self.logger.warning("LLM call or JSON parse failed for natural_language_search, returning empty result")
-            return SearchResult(query=query, matches=[], total_searched=len(results))
+        except Exception as exc:
+            self.logger.warning("LLM call failed for natural_language_search: %s", exc)
+            error_match = SearchMatch(
+                sample_hash="",
+                relevance_score=0.0,
+                explanation=f"[LLM error] {exc}",
+                matched_attributes=[],
+            )
+            return SearchResult(query=query, matches=[error_match], total_searched=len(results))
+
+        if data.get("_parse_error"):
+            raw_text = data.get("_raw_response", "")[:500]
+            error_match = SearchMatch(
+                sample_hash="",
+                relevance_score=0.0,
+                explanation=f"[LLM parse error] {raw_text}",
+                matched_attributes=[],
+            )
+            return SearchResult(query=query, matches=[error_match], total_searched=len(results))
 
         if not data:
             return SearchResult(query=query, matches=[], total_searched=len(results))

@@ -74,6 +74,16 @@ class SampleChainSuggester(BaseLLMFeature):
         # Parse response
         data = parse_json_response(raw)
 
+        if data.get("_parse_error"):
+            raw_text = data.get("_raw_response", "")[:500]
+            self.logger.warning("parse_json_response returned _parse_error for sample_chain")
+            return ChainResult(
+                ordered_hashes=[r.audio_sample_hash for r in result_list],
+                transitions=[],
+                energy_arc=f"[Parse error] Raw LLM response: {raw_text}",
+                overall_score=0.0,
+            )
+
         # Build result with graceful fallback
         try:
             transitions = []

@@ -62,9 +62,27 @@ class SamplePackCurator(BaseLLMFeature):
                 max_tokens=2000,
             )
             data = parse_json_response(raw)
-        except Exception:
-            self.logger.warning("LLM call or JSON parse failed for sample_pack_curator, returning empty result")
-            return PackCurationResult(packs=[], uncategorized=[])
+        except Exception as exc:
+            self.logger.warning("LLM call failed for sample_pack_curator: %s", exc)
+            error_pack = SamplePack(
+                name="[LLM error]",
+                description=f"[LLM error] {exc}",
+                tags=[],
+                sample_hashes=[],
+                confidence=0.0,
+            )
+            return PackCurationResult(packs=[error_pack], uncategorized=[])
+
+        if data.get("_parse_error"):
+            raw_text = data.get("_raw_response", "")[:500]
+            error_pack = SamplePack(
+                name="[LLM parse error]",
+                description=f"[LLM parse error] {raw_text}",
+                tags=[],
+                sample_hashes=[],
+                confidence=0.0,
+            )
+            return PackCurationResult(packs=[error_pack], uncategorized=[])
 
         if not data:
             return PackCurationResult(packs=[], uncategorized=[])

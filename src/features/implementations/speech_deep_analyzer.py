@@ -80,6 +80,20 @@ class SpokenContentAnalyzer(BaseLLMFeature):
         # Parse response
         data = parse_json_response(raw)
 
+        if data.get("_parse_error"):
+            raw_text = data.get("_raw_response", "")[:500]
+            self.logger.warning("parse_json_response returned _parse_error for speech_deep_analyzer")
+            return SpokenContentResult(
+                sample_hash=result.audio_sample_hash,
+                sentiment="neutral",
+                sentiment_score=0.0,
+                tone="neutral",
+                language_register="unknown",
+                genre_fit=[],
+                content_warnings=[],
+                licensing_notes=f"[Parse error] Raw LLM response: {raw_text}",
+            )
+
         # Build result, falling back to defaults if parsing failed
         try:
             return SpokenContentResult(

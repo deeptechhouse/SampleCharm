@@ -366,6 +366,11 @@ class ResultsTable:
             background=self.style.BG_LIGHT,
             foreground=self.style.TEXT_DIM,
         )
+        # Cached result rows get a dimmer appearance
+        self.tree.tag_configure(
+            'cached',
+            foreground=self.style.TEXT_DIM,
+        )
     
     def _sort_by_column(self, column: str):
         """Sort table by column."""
@@ -521,7 +526,10 @@ class ResultsTable:
                 self._data[path] = (result, thumbnail)
         else:
             # Insert new item
-            item = self.tree.insert('', 'end', values=row_values, tags=(str(path),))
+            tags = [str(path)]
+            if getattr(result, 'from_cache', False):
+                tags.append('cached')
+            item = self.tree.insert('', 'end', values=row_values, tags=tuple(tags))
             if thumbnail:
                 self._data[path] = (result, thumbnail)
             else:
@@ -2834,21 +2842,25 @@ class SampleCharmGUI:
                         except Exception:
                             pass  # Non-critical, continue with analysis
 
-                    # Analyze file
-                    print(f"Calling engine.analyze() for {path.name}...")
-                    result = self.engine.analyze(path)
-                    print(f"Analysis complete for {path.name}, result: {'present' if result else 'None'}")
+                    # Analyze file (force re-analysis if already processed)
+                    is_reanalysis = path in self.results
+                    print(f"Calling engine.analyze() for {path.name} (force={is_reanalysis})...")
+                    result = self.engine.analyze(path, force=is_reanalysis)
+                    print(f"Analysis complete for {path.name}, result: {'present' if result else 'None'}, cached: {getattr(result, 'from_cache', False)}")
                     files_processed += 1
-                    
+
                     # Store and display result immediately
                     if result:
                         self.results[path] = result
+                        is_cached = getattr(result, 'from_cache', False)
                         # Add to table instead of text display
                         audio_sample = self.audio_samples.get(path)
                         # Use default parameter to capture values correctly
                         def add_result(p=path, r=result, a=audio_sample):
                             self._add_to_table(p, r, a)
                         self.root.after(0, add_result)
+                        if is_cached:
+                            self.root.after(0, lambda name=path.name: self._log_result(f"[CACHED] {name} - loaded from cache\n"))
                         
                         # Auto-display waveform for first analyzed file
                         if i == 0 and path in self.audio_samples:
@@ -3239,8 +3251,21 @@ class SampleCharmGUI:
                     self.root.after(0, lambda r=raw: self._log_result(r))
 
                 except Exception as e:
-                    err = f"\n--- {display_name} ---\n  Error: {e}\n"
-                    self.root.after(0, lambda m=err: self._log_result(m))
+                    import traceback
+                    tb_str = traceback.format_exc()
+                    err_summary = f"Error ({type(e).__name__}): {e}"
+                    err_detail = (f"\n--- {display_name} ---\n  {err_summary}\n"
+                                  f"  Traceback:\n{tb_str}\n")
+
+                    # Add error row to table
+                    def _add_err(dn=display_name, s=err_summary, d=err_detail, fid=feature_id):
+                        if self.results_table:
+                            self.results_table.add_feature_row(
+                                feature_name=dn, summary=s, detail=d,
+                                time_str="ERR", model="", tag_id=fid,
+                            )
+                    self.root.after(0, _add_err)
+                    self.root.after(0, lambda m=err_detail: self._log_result(m))
 
             self.root.after(0, lambda: self._log_result(
                 f"\n{'='*60}\nAI FEATURES COMPLETE\n{'='*60}\n\n"))

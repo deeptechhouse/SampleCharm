@@ -40,7 +40,7 @@ class LLMAnalyzer(BaseAnalyzer[LLMAnalysis]):
         model: Optional[str] = None,
         api_key: Optional[str] = None,
         temperature: float = 0.3,
-        max_tokens: int = 1000,
+        max_tokens: int = 1500,
         shared_client=None,
     ):
         """
@@ -131,20 +131,32 @@ class LLMAnalyzer(BaseAnalyzer[LLMAnalysis]):
                 model_name=self.provider
             )
 
-    def _analyze_impl(self, audio: AudioSample, speech_data: Optional[dict] = None) -> LLMAnalysis:
+    def _analyze_impl(self, audio: AudioSample, speech_data: Optional[dict] = None, rhythmic_data=None) -> LLMAnalysis:
         """
         Analyze audio using LLM.
 
         Args:
             audio: AudioSample to analyze
             speech_data: Optional speech recognition results from Whisper
+            rhythmic_data: Optional RhythmicAnalysis from rhythmic analyzer
 
         Returns:
             LLMAnalysis: LLM-generated analysis (always returns a result, never None)
         """
         # Build context from audio characteristics
         context = self._build_audio_context(audio)
-        
+
+        # Enhance context with rhythmic data if available
+        if rhythmic_data is not None:
+            if hasattr(rhythmic_data, 'beat_times') and rhythmic_data.beat_times:
+                beat_times_ms = [round(t * 1000, 1) for t in rhythmic_data.beat_times]
+                context['beat_timestamps_ms'] = beat_times_ms[:20]
+                context['num_beats'] = len(rhythmic_data.beat_times)
+            if hasattr(rhythmic_data, 'tempo_bpm') and rhythmic_data.tempo_bpm:
+                context['tempo_bpm'] = round(rhythmic_data.tempo_bpm, 1)
+            if hasattr(rhythmic_data, 'is_one_shot'):
+                context['is_one_shot'] = rhythmic_data.is_one_shot
+
         # Enhance context with speech data if available
         if speech_data:
             context['speech_detected'] = speech_data.get('contains_speech', False)
@@ -214,6 +226,20 @@ class LLMAnalyzer(BaseAnalyzer[LLMAnalysis]):
             onset_count = len(features.onset_frames)
             context['complexity'] = f"{onset_count} onsets detected"
 
+            # Onset timestamps in milliseconds
+            if onset_count > 0:
+                try:
+                    import librosa as _librosa
+                    onset_times_sec = _librosa.frames_to_time(
+                        features.onset_frames, sr=audio.sample_rate, hop_length=512
+                    )
+                    onset_times_ms = [round(t * 1000, 1) for t in onset_times_sec]
+                    context['onset_timestamps_ms'] = onset_times_ms[:20]
+                    if len(onset_times_ms) > 20:
+                        context['total_onsets'] = len(onset_times_ms)
+                except Exception:
+                    pass  # Non-critical
+
             # Chroma features (for key indication)
             chroma_mean = np.mean(features.chroma, axis=1)
             dominant_pitch_class = int(np.argmax(chroma_mean))
@@ -224,7 +250,89 @@ class LLMAnalyzer(BaseAnalyzer[LLMAnalysis]):
             self.logger.warning(f"Could not extract all features: {e}")
             context['features_note'] = 'Some features could not be extracted'
 
+        # Panning analysis (stereo only)
+        if audio.channels == 2:
+            try:
+                context['panning'] = self._analyze_panning(audio)
+            except Exception:
+                context['panning'] = 'stereo (analysis unavailable)'
+        else:
+            context['panning'] = 'mono (no panning)'
+
         return context
+
+    def _analyze_panning(self, audio: AudioSample) -> str:
+        """Analyze stereo panning movement over time.
+
+        Compares L/R channel energy in windowed segments.
+        audio.audio_data shape is (2, samples) for stereo.
+        """
+        left = audio.audio_data[0]
+        right = audio.audio_data[1]
+
+        # Window size: ~50ms at sample_rate
+        window_size = max(1, int(audio.sample_rate * 0.05))
+        num_windows = len(left) // window_size
+
+        if num_windows < 2:
+            l_energy = float(np.sum(left ** 2))
+            r_energy = float(np.sum(right ** 2))
+            total = l_energy + r_energy
+            if total == 0:
+                return "silent"
+            balance = (r_energy - l_energy) / total
+            if abs(balance) < 0.1:
+                return "centered"
+            return "panned right" if balance > 0 else "panned left"
+
+        balances = []
+        for i in range(num_windows):
+            start = i * window_size
+            end = start + window_size
+            l_e = float(np.sum(left[start:end] ** 2))
+            r_e = float(np.sum(right[start:end] ** 2))
+            total = l_e + r_e
+            balances.append((r_e - l_e) / total if total > 0 else 0.0)
+
+        balances_arr = np.array(balances)
+        mean_balance = float(np.mean(balances_arr))
+        balance_range = float(np.max(balances_arr) - np.min(balances_arr))
+
+        if balance_range > 0.3:
+            mid = len(balances) // 2
+            first_half = float(np.mean(balances_arr[:mid]))
+            second_half = float(np.mean(balances_arr[mid:]))
+            if second_half > first_half + 0.1:
+                direction = "pans left-to-right"
+            elif first_half > second_half + 0.1:
+                direction = "pans right-to-left"
+            else:
+                direction = "oscillating/sweeping panning"
+            return f"{direction} (range: {balance_range:.2f}, center: {mean_balance:+.2f})"
+        else:
+            if abs(mean_balance) < 0.1:
+                return "centered (stereo)"
+            elif mean_balance > 0.3:
+                return "panned hard right"
+            elif mean_balance > 0.1:
+                return "panned slightly right"
+            elif mean_balance < -0.3:
+                return "panned hard left"
+            else:
+                return "panned slightly left"
+
+    def _format_speech_context(self, context: Dict[str, Any]) -> str:
+        """Format speech recognition context for the prompt."""
+        if context.get('transcription') or context.get('speech_detected'):
+            return (
+                f"SPEECH RECOGNITION RESULTS: Speech detected. "
+                f"Full transcription: '{context.get('transcription', '')}'. "
+                f"Detected words: {', '.join(context.get('speech_words', [])) if context.get('speech_words') else 'N/A'}. "
+                f"Language: {context.get('speech_language', 'unknown')}. "
+                f"Confidence: {context.get('speech_confidence', 0.0):.2f}. "
+                f"IMPORTANT: Use the transcription to understand content and context."
+            )
+        return "SPEECH RECOGNITION RESULTS: No speech detected."
 
     def _create_analysis_prompt(self, context: Dict[str, Any]) -> str:
         """
@@ -251,37 +359,73 @@ AUDIO CHARACTERISTICS:
 - Character: {context.get('character', 'unknown')}
 - Complexity: {context.get('complexity', 'unknown')}
 - Dominant pitch: {context.get('dominant_pitch', 'unknown')}
+- Panning: {context.get('panning', 'unknown')}"""
+
+        # Add temporal data if available
+        if context.get('onset_timestamps_ms'):
+            onsets = context['onset_timestamps_ms']
+            prompt += f"\n- Onset timestamps (ms): {onsets}"
+            if context.get('total_onsets'):
+                prompt += f" (showing first 20 of {context['total_onsets']})"
+
+        if context.get('beat_timestamps_ms'):
+            beats = context['beat_timestamps_ms']
+            prompt += f"\n- Beat timestamps (ms): {beats}"
+
+        if context.get('tempo_bpm'):
+            prompt += f"\n- Tempo: {context['tempo_bpm']} BPM"
+
+        if context.get('is_one_shot') is not None:
+            prompt += f"\n- One-shot: {'yes' if context['is_one_shot'] else 'no (loopable/rhythmic)'}"
+
+        if context.get('num_beats'):
+            prompt += f"\n- Number of beats: {context['num_beats']}"
+
+        speech_context = self._format_speech_context(context)
+
+        prompt += f"""
 
 Based on these characteristics, provide a comprehensive analysis:
 
-1. SUGGESTED NAME: A short, descriptive name for this audio sample (2-5 words, suitable for a file name or library entry)
+1. SUGGESTED NAME: A short, descriptive name for this audio sample (2-5 words, suitable for a file name or library entry). Be specific about what the sound IS, not just its qualities.
 
-2. DESCRIPTION: Write a rich, detailed description (aim for 30-50 words) that captures:
-   - What the audio sounds like (sonic character, texture, timbre)
-   - Its musical or sound design qualities
-   - Potential uses (e.g., "drum fill", "ambient texture", "transition effect", "melodic element", "interview", "spoken word", "vocal sample")
-   - Any notable characteristics (brightness, warmth, aggression, subtlety, etc.)
-   - If speech is present: describe the content, tone, and context (e.g., "interview with energetic discussion", "calm narration", "aggressive spoken word")
-   Be creative and specific - avoid generic phrases like "bright sound" or "percussive hit". Instead, describe it as a professional sound designer or audio archivist would.
+2. DESCRIPTION: Write a rich, vivid description (80-150 words) that covers ALL of the following:
 
-3. SPEECH DETECTION: Does this appear to contain speech or vocals? If yes, what type (spoken word, singing, interview, narration, etc.)?
-   {f"SPEECH RECOGNITION RESULTS: Speech detected. Full transcription: '{context.get('transcription', '')}'. Detected words: {', '.join(context.get('speech_words', [])) if context.get('speech_words') else 'N/A'}. Language: {context.get('speech_language', 'unknown')}. Confidence: {context.get('speech_confidence', 0.0):.2f}. IMPORTANT: Use the transcription to understand the content and context of the speech. For interviews, describe the topic and tone. For spoken word, describe the style and content." if (context.get('transcription') or context.get('speech_detected')) else "SPEECH RECOGNITION RESULTS: No speech detected by high-accuracy speech recognition system."}
+   a) SOUND IDENTIFICATION: What specific sound source(s) are present? Be precise — not just "drum" but "punchy 808 kick with sub-bass tail" or "brushed jazz snare with room ambience". Identify specific sources: car engine, dog bark, vinyl crackle, analog synth pad, distorted guitar, field recording, etc.
 
-4. TAGS: 5-10 relevant tags for categorization (e.g., "drum", "synth", "ambient", "one-shot", "loop", "fx", etc.)
+   b) TEMPORAL STRUCTURE: Describe what happens over time using the onset/beat timestamps provided. Example: "Opens with a pronounced kick at 0ms, followed by a sharp hi-hat at 125ms, with a snare crack at 250ms." If beats are present, describe the beat pattern (e.g., "two-beat phrase with a kick on the downbeat and snare on the upbeat"). If it's a one-shot, describe the attack-sustain-decay shape.
+
+   c) PANNING & SPATIAL: Describe the stereo positioning using the panning data. Does the sound pan left-to-right or right-to-left? Is it centered? Does it have stereo width, movement, or spatial depth?
+
+   d) SONIC CHARACTER: Describe texture, timbre, tonal qualities, dynamic range, and any notable processing (reverb tail, distortion artifacts, filtering, compression pumping, bit-crushing, saturation).
+
+   e) CREATIVE CONTEXT: What specific genre, mood, or production scenario fits this sample? Be imaginative and precise (e.g., "dark minimal techno breakdown" not "electronic music").
+
+   CRITICAL RULES:
+   - NEVER use generic filler: "versatile sound", "suitable for various genres", "adds texture to any mix"
+   - NEVER start with "This" or "A" — begin with an evocative verb or adjective
+   - Each description must be UNIQUE — vary sentence structure, vocabulary, and perspective
+   - Reference specific millisecond time points when describing temporal events
+   - Write as a world-class sound designer documenting a professional sample library
+
+3. SPEECH DETECTION: Does this contain speech or vocals? If yes, what type?
+   {speech_context}
+
+4. TAGS: 5-10 specific tags (prefer "808-kick" over "drum", "granular-pad" over "synth", "lo-fi-texture" over "ambient")
 
 5. CONFIDENCE: How confident are you in this analysis? (0.0 to 1.0)
 
-CRITICAL: You MUST provide a description. Even if you're uncertain, provide your best analysis based on the available information.
-If speech transcription is provided, incorporate it into the description to give context about what is being said.
+CRITICAL: You MUST provide a description. Even if uncertain, provide your best analysis.
+If speech transcription is provided, incorporate it into the description.
 
 Respond in JSON format:
 {{
     "suggested_name": "name here",
-    "description": "description here (REQUIRED - must be 30-50 words, detailed and specific)",
+    "description": "description here (REQUIRED — 80-150 words, detailed, specific, creative)",
     "contains_speech": true/false,
     "detected_words": ["word1", "word2"] or null,
     "speech_language": "en" or null,
-    "tags": ["tag1", "tag2", ...],
+    "tags": ["specific-tag1", "specific-tag2", ...],
     "confidence": 0.8,
     "explanation": "brief explanation of analysis reasoning"
 }}

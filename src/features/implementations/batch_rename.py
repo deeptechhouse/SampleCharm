@@ -66,10 +66,18 @@ class BatchRenamer(BaseLLMFeature):
                 max_tokens=1500,
             )
             data = parse_json_response(raw)
-        except Exception:
-            self.logger.warning("LLM call or JSON parse failed for batch_rename, returning empty result")
+        except Exception as exc:
+            self.logger.warning("LLM call failed for batch_rename: %s", exc)
             return RenameResult(
-                entries=[], naming_template=template, conflicts=[], is_dry_run=dry_run,
+                entries=[], naming_template=template,
+                conflicts=[f"[LLM error] {exc}"], is_dry_run=dry_run,
+            )
+
+        if data.get("_parse_error"):
+            raw_text = data.get("_raw_response", "")[:500]
+            return RenameResult(
+                entries=[], naming_template=template,
+                conflicts=[f"[LLM parse error] {raw_text}"], is_dry_run=dry_run,
             )
 
         if not data:
