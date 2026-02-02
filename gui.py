@@ -11,7 +11,7 @@ import threading
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
-from typing import Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional, Callable
 import numpy as np
 
 # Optional PIL import for thumbnails
@@ -3223,6 +3223,9 @@ class SampleCharmGUI:
 
         all_results = list(self.results.values())
 
+        # Determine which features expect single vs batch input
+        single_features = {'production_notes', 'speech_deep_analyzer'}
+
         def _run_in_background():
             for feature_id in enabled_ids:
                 display_name = self.ai_feature_names.get(
@@ -3230,7 +3233,12 @@ class SampleCharmGUI:
                 )
                 kwargs = self._build_feature_kwargs(feature_id)
                 try:
-                    result = self.engine.run_feature(feature_id, all_results, **kwargs)
+                    # Single features get first result; batch/single+batch get the list
+                    if feature_id in single_features and all_results:
+                        feature_input = all_results[0]
+                    else:
+                        feature_input = all_results
+                    result = self.engine.run_feature(feature_id, feature_input, **kwargs)
                     summary, detail = self._summarize_feature_data(result.data)
                     time_str = f"{result.processing_time:.2f}s"
                     model = result.model_used or ""

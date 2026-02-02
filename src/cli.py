@@ -321,8 +321,16 @@ def analyze_batch(
                     print(f"  Warning: {estimate.warning}")
                 return 0
 
-            feature_result = engine.run_feature(feature_id, results_list)
-            print_feature_result(feature_id, feature_result)
+            # Single-type features can't accept a list — run per result
+            feature_obj = engine.feature_manager.get_feature(feature_id)
+            if feature_obj and feature_obj.feature_type == "single":
+                for i, single_result in enumerate(results_list):
+                    feature_result = engine.run_feature(feature_id, single_result)
+                    print(f"\n--- Feature '{feature_id}' result for file {i+1}/{len(results_list)} ---")
+                    print_feature_result(feature_id, feature_result)
+            else:
+                feature_result = engine.run_feature(feature_id, results_list)
+                print_feature_result(feature_id, feature_result)
 
         return 0 if batch_result.failure_count == 0 else 1
 

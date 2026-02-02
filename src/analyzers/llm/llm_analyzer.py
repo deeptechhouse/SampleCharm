@@ -285,6 +285,11 @@ class LLMAnalyzer(BaseAnalyzer[LLMAnalysis]):
                 return "centered"
             return "panned right" if balance > 0 else "panned left"
 
+        # Check total energy first — if silent, skip windowed analysis
+        total_energy = float(np.sum(left ** 2) + np.sum(right ** 2))
+        if total_energy == 0:
+            return "silent"
+
         balances = []
         for i in range(num_windows):
             start = i * window_size

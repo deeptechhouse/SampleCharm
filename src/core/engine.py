@@ -471,7 +471,7 @@ def create_analysis_engine(
             llm_client = create_llm_client(config.get("llm", {}))
             gate = FeatureGate(
                 config=feat_cfg,
-                entitlement_provider=AlwaysEntitled(),
+                entitlement=AlwaysEntitled(),
             )
             feature_manager = LLMFeatureManager(llm_client, gate)
             logging.getLogger('engine').info(
