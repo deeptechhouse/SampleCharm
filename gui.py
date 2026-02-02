@@ -2935,6 +2935,12 @@ class SampleCharmGUI:
             completed_count = len(self.results)
             self._update_progress(100, f"Analysis complete! ({completed_count} file(s) analyzed)")
             print(f"Analysis complete! ({completed_count} file(s) analyzed)")
+
+            # Auto-run AI features if any are enabled and feature manager is available
+            enabled_count = sum(1 for v in self.ai_feature_vars.values() if v.get())
+            if enabled_count > 0 and self.feature_manager is not None:
+                self._update_progress(100, f"Analysis complete — running {enabled_count} AI feature(s)...")
+                self.root.after(100, self._run_ai_features)
         else:
             # Analysis was stopped or failed
             self._update_progress(100, "Analysis stopped")
@@ -3223,9 +3229,6 @@ class SampleCharmGUI:
 
         all_results = list(self.results.values())
 
-        # Determine which features expect single vs batch input
-        single_features = {'production_notes', 'speech_deep_analyzer'}
-
         def _run_in_background():
             for feature_id in enabled_ids:
                 display_name = self.ai_feature_names.get(
@@ -3233,8 +3236,10 @@ class SampleCharmGUI:
                 )
                 kwargs = self._build_feature_kwargs(feature_id)
                 try:
-                    # Single features get first result; batch/single+batch get the list
-                    if feature_id in single_features and all_results:
+                    # Determine input type dynamically from the feature itself
+                    feature_obj = self.feature_manager.get_feature(feature_id)
+                    is_single = feature_obj and feature_obj.feature_type == "single"
+                    if is_single and all_results:
                         feature_input = all_results[0]
                     else:
                         feature_input = all_results
