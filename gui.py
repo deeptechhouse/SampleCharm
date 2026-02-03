@@ -68,7 +68,12 @@ class JackStyle:
     FONT_HEADING = ("Helvetica", 11, "normal")
     FONT_BODY = ("Helvetica", 10, "normal")
     FONT_SMALL = ("Helvetica", 9, "normal")
-    
+
+    # Button colors
+    BTN_BG = "#4a4a4a"
+    BTN_FG = "#000000"
+    BTN_HOVER = "#525252"
+
     @classmethod
     def configure_widget(cls, widget, bg=None, fg=None, font=None, relief="flat", bd=0):
         """Configure widget with minimalist style."""
@@ -121,7 +126,12 @@ class DubStyle:
     FONT_HEADING = ("Helvetica", 11, "normal")
     FONT_BODY = ("Helvetica", 10, "normal")
     FONT_SMALL = ("Helvetica", 9, "normal")
-    
+
+    # Button colors
+    BTN_BG = "#FFCC00"
+    BTN_FG = "#0d1f0d"
+    BTN_HOVER = "#FFD700"
+
     @classmethod
     def configure_widget(cls, widget, bg=None, fg=None, font=None, relief="flat", bd=0):
         """Configure widget with dub style."""
@@ -135,6 +145,166 @@ class DubStyle:
         }
         widget.config(**style_config)
 
+
+class BunkerStyle:
+    """Bunker: Berlin techno / industrial aesthetic — deep blacks, brass accent."""
+
+    NAME = "Bunker"
+
+    BG_DARK = "#0a0a0c"
+    BG_MEDIUM = "#14141a"
+    BG_LIGHT = "#1e1e24"
+    BG_LIGHTER = "#2a2a30"
+    BG_HOVER = "#3a3a40"
+
+    TEXT_PRIMARY = "#d8d5cd"
+    TEXT_SECONDARY = "#9a9a9e"
+    TEXT_DIM = "#6a6a70"
+    TEXT_DISABLED = "#3a3a40"
+
+    ACCENT_RED = "#c4a67a"       # Brass (primary accent)
+    ACCENT_RED_LIGHT = "#d4be88"
+    ACCENT_RED_DIM = "#8a7550"
+
+    BORDER = "#2a2a30"
+    BORDER_LIGHT = "#3a3a40"
+    DIVIDER = "#1e1e24"
+
+    FONT_TITLE = ("Helvetica Neue", 16, "normal")
+    FONT_HEADING = ("Helvetica Neue", 11, "normal")
+    FONT_BODY = ("Helvetica Neue", 10, "normal")
+    FONT_SMALL = ("Menlo", 9, "normal")
+
+    # Button colors
+    BTN_BG = "#2a2a30"
+    BTN_FG = "#d8d5cd"
+    BTN_HOVER = "#3a3a40"
+
+    @classmethod
+    def configure_widget(cls, widget, bg=None, fg=None, font=None, relief="flat", bd=0):
+        widget.config(bg=bg or cls.BG_DARK, fg=fg or cls.TEXT_PRIMARY,
+                      font=font or cls.FONT_BODY, relief=relief, bd=bd, highlightthickness=0)
+
+
+class ChryslerStyle:
+    """Chrysler: Art Deco / Streamline Moderne — charcoal, gold, cream."""
+
+    NAME = "Chrysler"
+
+    BG_DARK = "#0c0b08"
+    BG_MEDIUM = "#1a1812"
+    BG_LIGHT = "#2a2720"
+    BG_LIGHTER = "#3a362e"
+    BG_HOVER = "#4a4538"
+
+    TEXT_PRIMARY = "#e8dcc0"      # Cream
+    TEXT_SECONDARY = "#c4a667"    # Gold
+    TEXT_DIM = "#8a7e60"
+    TEXT_DISABLED = "#5a5444"
+
+    ACCENT_RED = "#c4a667"       # Gold (primary accent)
+    ACCENT_RED_LIGHT = "#d4be88"
+    ACCENT_RED_DIM = "#8a7a4a"
+
+    BORDER = "#3a362e"
+    BORDER_LIGHT = "#4a4538"
+    DIVIDER = "#2a2720"
+
+    FONT_TITLE = ("Georgia", 16, "normal")
+    FONT_HEADING = ("Georgia", 11, "normal")
+    FONT_BODY = ("Helvetica", 10, "normal")
+    FONT_SMALL = ("Courier", 9, "normal")
+
+    BTN_BG = "#c4a667"
+    BTN_FG = "#0c0b08"
+    BTN_HOVER = "#d4be88"
+
+    @classmethod
+    def configure_widget(cls, widget, bg=None, fg=None, font=None, relief="flat", bd=0):
+        widget.config(bg=bg or cls.BG_DARK, fg=fg or cls.TEXT_PRIMARY,
+                      font=font or cls.FONT_BODY, relief=relief, bd=bd, highlightthickness=0)
+
+
+class VoidStyle:
+    """Void: Japanese minimalism — maximum restraint, near-black and off-white."""
+
+    NAME = "Void"
+
+    BG_DARK = "#0c0c0c"
+    BG_MEDIUM = "#161616"
+    BG_LIGHT = "#202020"
+    BG_LIGHTER = "#2c2c2c"
+    BG_HOVER = "#383838"
+
+    TEXT_PRIMARY = "#f5f4f0"     # Off-white
+    TEXT_SECONDARY = "#b0aea8"
+    TEXT_DIM = "#706e68"
+    TEXT_DISABLED = "#484846"
+
+    ACCENT_RED = "#f5f4f0"       # Off-white accent (monochrome)
+    ACCENT_RED_LIGHT = "#ffffff"
+    ACCENT_RED_DIM = "#b0aea8"
+
+    BORDER = "#202020"
+    BORDER_LIGHT = "#2c2c2c"
+    DIVIDER = "#161616"
+
+    FONT_TITLE = ("Helvetica Neue", 15, "normal")
+    FONT_HEADING = ("Helvetica Neue", 10, "normal")
+    FONT_BODY = ("Helvetica Neue", 10, "normal")
+    FONT_SMALL = ("Menlo", 8, "normal")
+
+    BTN_BG = "#202020"
+    BTN_FG = "#f5f4f0"
+    BTN_HOVER = "#2c2c2c"
+
+    @classmethod
+    def configure_widget(cls, widget, bg=None, fg=None, font=None, relief="flat", bd=0):
+        widget.config(bg=bg or cls.BG_DARK, fg=fg or cls.TEXT_PRIMARY,
+                      font=font or cls.FONT_BODY, relief=relief, bd=bd, highlightthickness=0)
+
+
+class PatinaStyle:
+    """Patina: Warm earth / Danish functionalism — oxidized copper, verdigris."""
+
+    NAME = "Patina"
+
+    BG_DARK = "#0d0c0a"
+    BG_MEDIUM = "#1a1814"
+    BG_LIGHT = "#28241e"
+    BG_LIGHTER = "#38342c"
+    BG_HOVER = "#484438"
+
+    TEXT_PRIMARY = "#e0d8c8"     # Warm linen
+    TEXT_SECONDARY = "#a09880"
+    TEXT_DIM = "#706850"
+    TEXT_DISABLED = "#484030"
+
+    ACCENT_RED = "#7ac4a0"       # Verdigris / patina green
+    ACCENT_RED_LIGHT = "#8ad4b0"
+    ACCENT_RED_DIM = "#5a9478"
+
+    BORDER = "#28241e"
+    BORDER_LIGHT = "#38342c"
+    DIVIDER = "#1a1814"
+
+    FONT_TITLE = ("Georgia", 16, "normal")
+    FONT_HEADING = ("Helvetica", 11, "normal")
+    FONT_BODY = ("Helvetica", 10, "normal")
+    FONT_SMALL = ("Menlo", 9, "normal")
+
+    BTN_BG = "#38342c"
+    BTN_FG = "#e0d8c8"
+    BTN_HOVER = "#484438"
+
+    @classmethod
+    def configure_widget(cls, widget, bg=None, fg=None, font=None, relief="flat", bd=0):
+        widget.config(bg=bg or cls.BG_DARK, fg=fg or cls.TEXT_PRIMARY,
+                      font=font or cls.FONT_BODY, relief=relief, bd=bd, highlightthickness=0)
+
+
+# All styles in rotation order
+ALL_STYLES = [JackStyle, DubStyle, BunkerStyle, ChryslerStyle, VoidStyle, PatinaStyle]
 
 # Alias for backward compatibility
 MinimalistStyle = JackStyle
@@ -1010,13 +1180,13 @@ class SampleCharmGUI:
         toggle_label.pack(side=tk.LEFT, padx=(0, 8))
         
         # Toggle button (elegant switch)
-        self.style_toggle_var = tk.StringVar(value="Jack")
+        self.style_toggle_var = tk.StringVar(value=self.current_style.NAME)
         self.style_toggle = tk.Button(
             style_row,
-            text="Jack",
+            text=self.current_style.NAME,
             command=self._toggle_style,
-            bg=self.current_style.BG_MEDIUM,
-            fg=self.current_style.TEXT_PRIMARY,
+            bg=self.current_style.BTN_BG,
+            fg=self.current_style.BTN_FG,
             font=self.current_style.FONT_SMALL,
             relief=tk.FLAT,
             bd=0,
@@ -1511,59 +1681,11 @@ class SampleCharmGUI:
             self.all_buttons.append(self.waveform_panel._zoom_out_btn)
             self.all_buttons.append(self.waveform_panel._reset_btn)
             
-            # Update waveform panel buttons immediately with current style (full config)
-            if self.current_style.NAME == "Dub":
-                for btn in [self.waveform_panel._zoom_in_btn, 
-                           self.waveform_panel._zoom_out_btn, 
-                           self.waveform_panel._reset_btn]:
-                    # Apply multiple times to override hardcoded styles
-                    for _ in range(5):
-                        btn.config(
-                            bg="#FFCC00",
-                            fg="#0d1f0d",
-                            activebackground="#FFD700",
-                            activeforeground="#0d1f0d",
-                            highlightbackground="#FFCC00",
-                            highlightcolor="#FFCC00",
-                            relief=tk.FLAT,
-                            borderwidth=0
-                        )
-                        btn.configure(
-                            bg="#FFCC00",
-                            fg="#0d1f0d",
-                            activebackground="#FFD700",
-                            activeforeground="#0d1f0d",
-                            highlightbackground="#FFCC00",
-                            highlightcolor="#FFCC00",
-                            relief=tk.FLAT,
-                            borderwidth=0
-                        )
-            else:
-                for btn in [self.waveform_panel._zoom_in_btn, 
-                           self.waveform_panel._zoom_out_btn, 
-                           self.waveform_panel._reset_btn]:
-                    # Apply multiple times to override hardcoded styles
-                    for _ in range(5):
-                        btn.config(
-                            bg="#4a4a4a",
-                            fg="#000000",
-                            activebackground="#525252",
-                            activeforeground="#000000",
-                            highlightbackground="#4a4a4a",
-                            highlightcolor="#4a4a4a",
-                            relief=tk.FLAT,
-                            borderwidth=0
-                        )
-                        btn.configure(
-                            bg="#4a4a4a",
-                            fg="#000000",
-                            activebackground="#525252",
-                            activeforeground="#000000",
-                            highlightbackground="#4a4a4a",
-                            highlightcolor="#4a4a4a",
-                            relief=tk.FLAT,
-                            borderwidth=0
-                        )
+            # Update waveform panel buttons immediately with current style
+            for btn in [self.waveform_panel._zoom_in_btn,
+                       self.waveform_panel._zoom_out_btn,
+                       self.waveform_panel._reset_btn]:
+                self._apply_btn_style(btn, repeats=5)
 
         # Search/filter frame
         search_frame = tk.Frame(right_panel, bg=MinimalistStyle.BG_DARK)
@@ -1691,27 +1813,22 @@ class SampleCharmGUI:
         output_v_scroll.config(command=self.output_text.yview)
         
     def _toggle_style(self):
-        """Toggle between Jack and Dub color schemes."""
-        if self.current_style == JackStyle:
-            self.current_style = DubStyle
-            self.style_toggle_var.set("Dub")
-        else:
-            self.current_style = JackStyle
-            self.style_toggle_var.set("Jack")
-        
+        """Cycle through all available color schemes."""
+        # Find current index and advance to next
+        try:
+            idx = ALL_STYLES.index(self.current_style)
+        except ValueError:
+            idx = -1
+        next_idx = (idx + 1) % len(ALL_STYLES)
+        self.current_style = ALL_STYLES[next_idx]
+        self.style_toggle_var.set(self.current_style.NAME)
+
         # Update toggle button text and style
-        if self.current_style.NAME == "Dub":
-            self.style_toggle.config(
-                text=self.current_style.NAME,
-                bg="#FFCC00",  # Gold
-                fg="#0d1f0d"   # Green text
-            )
-        else:
-            self.style_toggle.config(
-                text=self.current_style.NAME,
-                bg="#4a4a4a",  # Light grey
-                fg="#000000"   # Black text
-            )
+        self.style_toggle.config(
+            text=self.current_style.NAME,
+            bg=self.current_style.BTN_BG,
+            fg=self.current_style.BTN_FG
+        )
         
         # Update all widgets with new style
         self._update_style()
@@ -1748,7 +1865,7 @@ class SampleCharmGUI:
                 if btn.winfo_class() == 'Button':
                     try:
                         text = btn.cget('text')
-                        if text not in ['Jack', 'Dub']:
+                        if text not in self._style_names():
                             btn.bind('<Button-1>', protect_buttons_after_event)
                             btn.bind('<ButtonRelease-1>', protect_buttons_after_event)
                             btn.bind('<Enter>', protect_buttons_after_event)
@@ -1769,287 +1886,94 @@ class SampleCharmGUI:
         
         # Also set up a periodic refresh for buttons (every 500ms)
         def periodic_button_refresh():
-            if self.current_style.NAME == "Dub":
-                self._force_update_all_buttons()
+            self._force_update_all_buttons()
             self.root.after(500, periodic_button_refresh)
         
         periodic_button_refresh()
     
+    def _style_names(self):
+        """Return set of all style names (for toggle button skip check)."""
+        return {s.NAME for s in ALL_STYLES}
+
+    def _apply_btn_style(self, btn, repeats=3):
+        """Apply current style button colors to a tk.Button widget."""
+        s = self.current_style
+        cfg = dict(
+            bg=s.BTN_BG, fg=s.BTN_FG,
+            activebackground=s.BTN_HOVER, activeforeground=s.BTN_FG,
+            highlightbackground=s.BTN_BG, highlightcolor=s.BTN_BG,
+            relief=tk.FLAT, borderwidth=0,
+            overrelief=tk.FLAT, highlightthickness=0,
+        )
+        for _ in range(repeats):
+            btn.config(**cfg)
+            btn.configure(**cfg)
+
     def _reapply_button_style(self, btn):
         """Re-apply current style to a single button."""
         if not btn or btn.winfo_class() != 'Button':
             return
         try:
             text = btn.cget('text')
-            if text in ['Jack', 'Dub']:
+            if text in self._style_names():
                 return  # Skip style toggle
         except:
             pass
-        
-        if self.current_style.NAME == "Dub":
-            for _ in range(5):  # More aggressive
-                btn.config(
-                    bg="#FFCC00",
-                    fg="#0d1f0d",
-                    activebackground="#FFD700",
-                    activeforeground="#0d1f0d",
-                    highlightbackground="#FFCC00",
-                    highlightcolor="#FFCC00",
-                    relief=tk.FLAT,
-                    borderwidth=0,
-                    overrelief=tk.FLAT,
-                    highlightthickness=0
-                )
-                btn.configure(
-                    bg="#FFCC00",
-                    fg="#0d1f0d",
-                    activebackground="#FFD700",
-                    activeforeground="#0d1f0d",
-                    highlightbackground="#FFCC00",
-                    highlightcolor="#FFCC00",
-                    relief=tk.FLAT,
-                    borderwidth=0,
-                    overrelief=tk.FLAT,
-                    highlightthickness=0
-                )
-            # Force a widget update
-            try:
-                btn.update_idletasks()
-            except:
-                pass
-        else:
-            for _ in range(3):
-                btn.config(
-                    bg="#4a4a4a",
-                    fg="#000000",
-                    activebackground="#525252",
-                    activeforeground="#000000",
-                    highlightbackground="#4a4a4a",
-                    highlightcolor="#4a4a4a",
-                    relief=tk.FLAT,
-                    borderwidth=0
-                )
-                btn.configure(
-                    bg="#4a4a4a",
-                    fg="#000000",
-                    activebackground="#525252",
-                    activeforeground="#000000",
-                    highlightbackground="#4a4a4a",
-                    highlightcolor="#4a4a4a",
-                    relief=tk.FLAT,
-                    borderwidth=0
-                )
+
+        self._apply_btn_style(btn, repeats=5)
+        try:
+            btn.update_idletasks()
+        except:
+            pass
     
     def _force_update_all_buttons(self):
-        """Force update all buttons - more aggressive version matching stop button styling."""
+        """Force update all buttons - aggressive version for macOS."""
+        style_names = self._style_names()
+
         def force_button_update(widget):
-            """Recursively force update all buttons with full configuration."""
             try:
                 if widget.winfo_class() == 'Button':
                     try:
                         text = widget.cget('text')
-                        if text not in ['Jack', 'Dub']:
-                            # Use exact same configuration as _create_button uses
-                            if self.current_style.NAME == "Dub":
-                                # Match stop button: gold background, green text, all options
-                                # Apply multiple times to override system styling
-                                for _ in range(3):  # Try 3 times
-                                    widget.config(
-                                    bg="#FFCC00",
-                                    fg="#0d1f0d",
-                                    activebackground="#FFD700",
-                                    activeforeground="#0d1f0d",
-                                    highlightbackground="#FFCC00",
-                                    highlightcolor="#FFCC00",
-                                    relief=tk.FLAT,
-                                    borderwidth=0,
-                                    overrelief=tk.FLAT,
-                                    highlightthickness=0
-                                )
-                                widget.configure(
-                                    bg="#FFCC00",
-                                    fg="#0d1f0d",
-                                    activebackground="#FFD700",
-                                    activeforeground="#0d1f0d",
-                                    highlightbackground="#FFCC00",
-                                    highlightcolor="#FFCC00",
-                                    relief=tk.FLAT,
-                                    borderwidth=0,
-                                    overrelief=tk.FLAT,
-                                    highlightthickness=0
-                                )
-                                # Force widget update
-                                try:
-                                    widget.update_idletasks()
-                                except:
-                                    pass
-                            else:
-                                # Jack style: grey background, black text
-                                for _ in range(3):  # Try 3 times
-                                    widget.config(
-                                        bg="#4a4a4a",
-                                        fg="#000000",
-                                        activebackground="#525252",
-                                        activeforeground="#000000",
-                                        highlightbackground="#4a4a4a",
-                                        highlightcolor="#4a4a4a",
-                                        relief=tk.FLAT,
-                                        borderwidth=0,
-                                        overrelief=tk.FLAT,
-                                        highlightthickness=0
-                                    )
-                                    widget.configure(
-                                        bg="#4a4a4a",
-                                        fg="#000000",
-                                        activebackground="#525252",
-                                        activeforeground="#000000",
-                                        highlightbackground="#4a4a4a",
-                                        highlightcolor="#4a4a4a",
-                                        relief=tk.FLAT,
-                                        borderwidth=0,
-                                        overrelief=tk.FLAT,
-                                        highlightthickness=0
-                                    )
-                                # Force widget update
-                                try:
-                                    widget.update_idletasks()
-                                except:
-                                    pass
+                        if text not in style_names:
+                            self._apply_btn_style(widget, repeats=3)
+                            try:
+                                widget.update_idletasks()
+                            except:
+                                pass
                     except:
                         pass
             except:
                 pass
-            
             try:
                 for child in widget.winfo_children():
                     force_button_update(child)
             except:
                 pass
-        
-        # Run multiple passes
+
         for _ in range(3):
             force_button_update(self.root)
-        
-        # Explicitly update all stored button references (like stop button)
+
+        # Explicitly update all stored button references
         if hasattr(self, 'all_buttons'):
             for btn in self.all_buttons:
                 try:
                     text = btn.cget('text')
-                    if text not in ['Jack', 'Dub']:
-                        if self.current_style.NAME == "Dub":
-                            # Match stop button exactly - apply multiple times to override cache
-                            for _ in range(5):  # Apply 5 times to force override
-                                btn.config(
-                                    bg="#FFCC00",
-                                    fg="#0d1f0d",
-                                    activebackground="#FFD700",
-                                    activeforeground="#0d1f0d",
-                                    highlightbackground="#FFCC00",
-                                    highlightcolor="#FFCC00",
-                                    relief=tk.FLAT,
-                                    borderwidth=0
-                                )
-                                btn.configure(
-                                    bg="#FFCC00",
-                                    fg="#0d1f0d",
-                                    activebackground="#FFD700",
-                                    activeforeground="#0d1f0d",
-                                    highlightbackground="#FFCC00",
-                                    highlightcolor="#FFCC00",
-                                    relief=tk.FLAT,
-                                    borderwidth=0
-                                )
-                            # Force widget to update
-                            btn.update_idletasks()
-                        else:
-                            # Jack style
-                            for _ in range(5):  # Apply 5 times to force override
-                                btn.config(
-                                    bg="#4a4a4a",
-                                    fg="#000000",
-                                    activebackground="#525252",
-                                    activeforeground="#000000",
-                                    highlightbackground="#4a4a4a",
-                                    highlightcolor="#4a4a4a",
-                                    relief=tk.FLAT,
-                                    borderwidth=0
-                                )
-                                btn.configure(
-                                    bg="#4a4a4a",
-                                    fg="#000000",
-                                    activebackground="#525252",
-                                    activeforeground="#000000",
-                                    highlightbackground="#4a4a4a",
-                                    highlightcolor="#4a4a4a",
-                                    relief=tk.FLAT,
-                                    borderwidth=0
-                                )
-                            # Force widget to update
-                            btn.update_idletasks()
+                    if text not in style_names:
+                        self._apply_btn_style(btn, repeats=5)
+                        btn.update_idletasks()
                 except:
                     pass
-        
-        # Also update waveform panel buttons explicitly with full configuration
+
+        # Also update waveform panel buttons
         if hasattr(self, 'waveform_panel') and self.waveform_panel:
             try:
-                if hasattr(self.waveform_panel, '_zoom_in_btn'):
-                    if self.current_style.NAME == "Dub":
-                        # Match stop button styling exactly - apply multiple times
-                        for btn in [self.waveform_panel._zoom_in_btn, 
-                                   self.waveform_panel._zoom_out_btn, 
-                                   self.waveform_panel._reset_btn]:
-                            # Apply 5 times to override hardcoded styles
-                            for _ in range(5):
-                                btn.config(
-                                    bg="#FFCC00",
-                                    fg="#0d1f0d",
-                                    activebackground="#FFD700",
-                                    activeforeground="#0d1f0d",
-                                    highlightbackground="#FFCC00",
-                                    highlightcolor="#FFCC00",
-                                    relief=tk.FLAT,
-                                    borderwidth=0
-                                )
-                                btn.configure(
-                                    bg="#FFCC00",
-                                    fg="#0d1f0d",
-                                    activebackground="#FFD700",
-                                    activeforeground="#0d1f0d",
-                                    highlightbackground="#FFCC00",
-                                    highlightcolor="#FFCC00",
-                                    relief=tk.FLAT,
-                                    borderwidth=0
-                                )
-                    else:
-                        # Jack style
-                        for btn in [self.waveform_panel._zoom_in_btn, 
-                                   self.waveform_panel._zoom_out_btn, 
-                                   self.waveform_panel._reset_btn]:
-                            # Apply 5 times to override hardcoded styles
-                            for _ in range(5):
-                                btn.config(
-                                    bg="#4a4a4a",
-                                    fg="#000000",
-                                    activebackground="#525252",
-                                    activeforeground="#000000",
-                                    highlightbackground="#4a4a4a",
-                                    highlightcolor="#4a4a4a",
-                                    relief=tk.FLAT,
-                                    borderwidth=0
-                                )
-                                btn.configure(
-                                    bg="#4a4a4a",
-                                    fg="#000000",
-                                    activebackground="#525252",
-                                    activeforeground="#000000",
-                                    highlightbackground="#4a4a4a",
-                                    highlightcolor="#4a4a4a",
-                                    relief=tk.FLAT,
-                                    borderwidth=0
-                                )
+                for attr in ('_zoom_in_btn', '_zoom_out_btn', '_reset_btn'):
+                    if hasattr(self.waveform_panel, attr):
+                        self._apply_btn_style(getattr(self.waveform_panel, attr), repeats=5)
             except:
                 pass
-        
+
         self.root.update_idletasks()
     
     def _update_style(self):
@@ -2086,7 +2010,7 @@ class SampleCharmGUI:
             # Rebuild table styles
             self.results_table._apply_style()
             # Update treeview colors - use black text for Dub style
-            text_color = "#000000" if self.current_style.NAME == "Dub" else self.current_style.TEXT_PRIMARY
+            text_color = self.current_style.TEXT_PRIMARY
             style = ttk.Style()
             style.configure(
                 'Treeview',
@@ -2114,304 +2038,117 @@ class SampleCharmGUI:
     
     def _update_widget_style(self, widget):
         """Recursively update widget styles."""
+        # Build sets of known bg/fg colors across all styles for label mapping
+        all_bg_dark = {s.BG_DARK for s in ALL_STYLES}
+        all_bg_medium = {s.BG_MEDIUM for s in ALL_STYLES}
+        all_bg_light = {s.BG_LIGHT for s in ALL_STYLES}
+        all_known_bg = all_bg_dark | all_bg_medium | all_bg_light
+        all_text_primary = {s.TEXT_PRIMARY for s in ALL_STYLES}
+        all_text_secondary = {s.TEXT_SECONDARY for s in ALL_STYLES}
+        style_names = self._style_names()
+
         try:
             widget_type = widget.winfo_class()
-            
-            # Update frames
+
             if widget_type == 'Frame':
                 if hasattr(widget, 'cget') and widget.cget('bg'):
                     widget.configure(bg=self.current_style.BG_DARK)
-            
-            # Update labels
+
             elif widget_type == 'Label':
                 if hasattr(widget, 'cget'):
                     current_bg = widget.cget('bg')
                     current_fg = widget.cget('fg')
-                    # Only update if it's a styled widget (not system colors)
-                    if current_bg in [JackStyle.BG_DARK, JackStyle.BG_MEDIUM, JackStyle.BG_LIGHT, 
-                                     DubStyle.BG_DARK, DubStyle.BG_MEDIUM, DubStyle.BG_LIGHT]:
-                        # Map old colors to new
-                        if current_bg == JackStyle.BG_DARK or current_bg == DubStyle.BG_DARK:
+                    if current_bg in all_known_bg:
+                        if current_bg in all_bg_dark:
                             widget.configure(bg=self.current_style.BG_DARK)
-                        elif current_bg == JackStyle.BG_MEDIUM or current_bg == DubStyle.BG_MEDIUM:
+                        elif current_bg in all_bg_medium:
                             widget.configure(bg=self.current_style.BG_MEDIUM)
-                        elif current_bg == JackStyle.BG_LIGHT or current_bg == DubStyle.BG_LIGHT:
+                        elif current_bg in all_bg_light:
                             widget.configure(bg=self.current_style.BG_LIGHT)
-                        
-                        # For Dub style, always use black text
-                        if self.current_style.NAME == "Dub":
-                            widget.configure(fg="#000000")  # Black text
-                        else:
-                            # For Jack style, use original text colors
-                            if current_fg in [JackStyle.TEXT_PRIMARY, JackStyle.TEXT_SECONDARY,
-                                             DubStyle.TEXT_PRIMARY, DubStyle.TEXT_SECONDARY]:
-                                if current_fg == JackStyle.TEXT_PRIMARY or current_fg == DubStyle.TEXT_PRIMARY:
-                                    widget.configure(fg=self.current_style.TEXT_PRIMARY)
-                                elif current_fg == JackStyle.TEXT_SECONDARY or current_fg == DubStyle.TEXT_SECONDARY:
-                                    widget.configure(fg=self.current_style.TEXT_SECONDARY)
-            
-            # Update buttons - force update ALL buttons with full configuration
+                        # Update text color
+                        widget.configure(fg=self.current_style.TEXT_PRIMARY)
+                        if current_fg in all_text_secondary:
+                            widget.configure(fg=self.current_style.TEXT_SECONDARY)
+
             elif widget_type == 'Button':
                 try:
-                    # Skip style toggle button (handled separately)
                     try:
                         widget_text = widget.cget('text')
-                        if widget_text in ['Jack', 'Dub']:
-                            return  # Skip style toggle
+                        if widget_text in style_names:
+                            # Recursively update children then return
+                            for child in widget.winfo_children():
+                                self._update_widget_style(child)
+                            return
                     except:
                         pass
-                    
-                    # Force update ALL buttons with full configuration (matching stop button)
-                    # For Dub style: gold background with green text
-                    if self.current_style.NAME == "Dub":
-                        # Apply full configuration multiple times to ensure it sticks
-                        for _ in range(3):
-                            widget.configure(
-                                bg="#FFCC00",
-                                fg="#0d1f0d",
-                                activebackground="#FFD700",
-                                activeforeground="#0d1f0d",
-                                highlightbackground="#FFCC00",
-                                highlightcolor="#FFCC00",
-                                relief=tk.FLAT,
-                                borderwidth=0
-                            )
-                            widget.config(
-                                bg="#FFCC00",
-                                fg="#0d1f0d",
-                                activebackground="#FFD700",
-                                activeforeground="#0d1f0d",
-                                highlightbackground="#FFCC00",
-                                highlightcolor="#FFCC00",
-                                relief=tk.FLAT,
-                                borderwidth=0
-                            )
-                    else:
-                        # Jack style: light grey background with black text
-                        for _ in range(3):
-                            widget.configure(
-                                bg="#4a4a4a",
-                                fg="#000000",
-                                activebackground="#525252",
-                                activeforeground="#000000",
-                                highlightbackground="#4a4a4a",
-                                highlightcolor="#4a4a4a",
-                                relief=tk.FLAT,
-                                borderwidth=0
-                            )
-                            widget.config(
-                                bg="#4a4a4a",
-                                fg="#000000",
-                                activebackground="#525252",
-                                activeforeground="#000000",
-                                highlightbackground="#4a4a4a",
-                                highlightcolor="#4a4a4a",
-                                relief=tk.FLAT,
-                                borderwidth=0
-                            )
+                    self._apply_btn_style(widget, repeats=3)
                 except Exception:
-                    # Skip buttons that can't be configured
                     pass
-            
-            # Update listbox
+
             elif widget_type == 'Listbox':
                 if hasattr(widget, 'cget'):
                     widget.configure(bg=self.current_style.BG_MEDIUM, fg=self.current_style.TEXT_PRIMARY,
                                    selectbackground=self.current_style.BG_LIGHTER,
                                    selectforeground=self.current_style.TEXT_PRIMARY)
-            
-            # Update text widgets
+
             elif widget_type == 'Text':
                 if hasattr(widget, 'cget'):
                     widget.configure(bg=self.current_style.BG_MEDIUM, fg=self.current_style.TEXT_PRIMARY)
-            
-            # Update entry widgets
+
             elif widget_type == 'Entry':
                 if hasattr(widget, 'cget'):
                     widget.configure(bg=self.current_style.BG_MEDIUM, fg=self.current_style.TEXT_PRIMARY,
                                    insertbackground=self.current_style.TEXT_PRIMARY)
-            
-            # Update scrollbars
+
             elif widget_type == 'Scrollbar':
                 if hasattr(widget, 'cget'):
-                    widget.configure(bg=self.current_style.BG_DARK, 
+                    widget.configure(bg=self.current_style.BG_DARK,
                                    troughcolor=self.current_style.BG_MEDIUM)
-            
-            # Recursively update children
+
             for child in widget.winfo_children():
                 self._update_widget_style(child)
-                
+
         except Exception:
-            # Skip widgets that can't be updated
             pass
     
     def _update_all_buttons(self):
-        """Explicitly update all buttons in the GUI - force update regardless of current color."""
+        """Explicitly update all buttons in the GUI."""
+        style_names = self._style_names()
+
         def update_button_recursive(widget):
-            """Recursively find and update all buttons."""
             try:
-                widget_class = widget.winfo_class()
-                if widget_class == 'Button':
-                    # Force update ALL buttons regardless of current color
-                    # Skip the style toggle button (it's handled separately)
+                if widget.winfo_class() == 'Button':
                     try:
                         widget_text = widget.cget('text')
-                        if widget_text in ['Jack', 'Dub']:
-                            # This is the style toggle, skip it (handled in _toggle_style)
-                            pass
-                        else:
-                            # For Dub style: gold background with green text - match stop button exactly
-                            if self.current_style.NAME == "Dub":
-                                try:
-                                    # Use exact same configuration as _create_button (matching stop button)
-                                    widget.configure(
-                                        bg="#FFCC00",
-                                        fg="#0d1f0d",
-                                        activebackground="#FFD700",
-                                        activeforeground="#0d1f0d",
-                                        highlightbackground="#FFCC00",
-                                        highlightcolor="#FFCC00",
-                                        relief=tk.FLAT,
-                                        borderwidth=0,
-                                        overrelief=tk.FLAT,
-                                        highlightthickness=0
-                                    )
-                                    # Also use config() to ensure it sticks
-                                    widget.config(
-                                        bg="#FFCC00",
-                                        fg="#0d1f0d",
-                                        activebackground="#FFD700",
-                                        activeforeground="#0d1f0d",
-                                        highlightbackground="#FFCC00",
-                                        highlightcolor="#FFCC00",
-                                        relief=tk.FLAT,
-                                        borderwidth=0,
-                                        overrelief=tk.FLAT,
-                                        highlightthickness=0
-                                    )
-                                    # Force widget update
-                                    try:
-                                        widget.update_idletasks()
-                                    except:
-                                        pass
-                                except:
-                                    # Fallback if some options don't work
-                                    try:
-                                        widget.config(bg="#FFCC00", fg="#0d1f0d")
-                                        widget.configure(bg="#FFCC00", fg="#0d1f0d")
-                                    except:
-                                        pass
-                            else:
-                                # Jack style: light grey background with black text
-                                try:
-                                    # Use exact same configuration as _create_button
-                                    widget.configure(
-                                        bg="#4a4a4a",
-                                        fg="#000000",
-                                        activebackground="#525252",
-                                        activeforeground="#000000",
-                                        highlightbackground="#4a4a4a",
-                                        highlightcolor="#4a4a4a",
-                                        relief=tk.FLAT,
-                                        borderwidth=0
-                                    )
-                                    # Also use config() to ensure it sticks
-                                    widget.config(
-                                        bg="#4a4a4a",
-                                        fg="#000000",
-                                        activebackground="#525252",
-                                        activeforeground="#000000",
-                                        highlightbackground="#4a4a4a",
-                                        highlightcolor="#4a4a4a",
-                                        relief=tk.FLAT,
-                                        borderwidth=0
-                                    )
-                                except:
-                                    # Fallback if some options don't work
-                                    try:
-                                        widget.config(bg="#4a4a4a", fg="#000000")
-                                        widget.configure(bg="#4a4a4a", fg="#000000")
-                                    except:
-                                        pass
+                        if widget_text not in style_names:
+                            self._apply_btn_style(widget, repeats=2)
                     except (tk.TclError, AttributeError):
-                        # Button might be destroyed or not support cget
-                        # Try to update anyway
                         try:
-                            if self.current_style.NAME == "Dub":
-                                widget.configure(bg="#FFCC00", fg="#0d1f0d")
-                            else:
-                                widget.configure(bg="#4a4a4a", fg="#000000")
+                            self._apply_btn_style(widget, repeats=1)
                         except:
                             pass
             except:
                 pass
-            
-            # Recursively update children
             try:
                 for child in widget.winfo_children():
                     update_button_recursive(child)
             except Exception:
                 pass
-        
-        # Start from root and update all buttons - do this multiple times to catch all
-        for _ in range(5):  # Try many times to ensure all buttons are caught (macOS needs this)
+
+        for _ in range(5):
             update_button_recursive(self.root)
-        
-        # Force update after recursive update
+
         try:
             self.root.update_idletasks()
         except:
             pass
-        
-        # Also explicitly update waveform panel buttons if they exist
+
+        # Also update waveform panel buttons
         if hasattr(self, 'waveform_panel') and self.waveform_panel:
             try:
-                # Update zoom and reset buttons in waveform panel
-                if hasattr(self.waveform_panel, '_zoom_in_btn'):
-                    if self.current_style.NAME == "Dub":
-                        self.waveform_panel._zoom_in_btn.configure(
-                            bg="#FFCC00", activebackground="#FFD700", 
-                            fg="#0d1f0d", activeforeground="#0d1f0d",
-                            highlightbackground="#FFCC00", highlightcolor="#FFCC00",
-                            relief=tk.FLAT, borderwidth=0
-                        )
-                    else:
-                        self.waveform_panel._zoom_in_btn.configure(
-                            bg="#4a4a4a", activebackground="#525252",
-                            fg="#000000", activeforeground="#000000",
-                            highlightbackground="#4a4a4a", highlightcolor="#4a4a4a",
-                            relief=tk.FLAT, borderwidth=0
-                        )
-                if hasattr(self.waveform_panel, '_zoom_out_btn'):
-                    if self.current_style.NAME == "Dub":
-                        self.waveform_panel._zoom_out_btn.configure(
-                            bg="#FFCC00", activebackground="#FFD700", 
-                            fg="#0d1f0d", activeforeground="#0d1f0d",
-                            highlightbackground="#FFCC00", highlightcolor="#FFCC00",
-                            relief=tk.FLAT, borderwidth=0
-                        )
-                    else:
-                        self.waveform_panel._zoom_out_btn.configure(
-                            bg="#4a4a4a", activebackground="#525252",
-                            fg="#000000", activeforeground="#000000",
-                            highlightbackground="#4a4a4a", highlightcolor="#4a4a4a",
-                            relief=tk.FLAT, borderwidth=0
-                        )
-                if hasattr(self.waveform_panel, '_reset_btn'):
-                    if self.current_style.NAME == "Dub":
-                        self.waveform_panel._reset_btn.configure(
-                            bg="#FFCC00", activebackground="#FFD700", 
-                            fg="#0d1f0d", activeforeground="#0d1f0d",
-                            highlightbackground="#FFCC00", highlightcolor="#FFCC00",
-                            relief=tk.FLAT, borderwidth=0
-                        )
-                    else:
-                        self.waveform_panel._reset_btn.configure(
-                            bg="#4a4a4a", activebackground="#525252",
-                            fg="#000000", activeforeground="#000000",
-                            highlightbackground="#4a4a4a", highlightcolor="#4a4a4a",
-                            relief=tk.FLAT, borderwidth=0
-                        )
+                for attr in ('_zoom_in_btn', '_zoom_out_btn', '_reset_btn'):
+                    if hasattr(self.waveform_panel, attr):
+                        self._apply_btn_style(getattr(self.waveform_panel, attr), repeats=3)
             except Exception:
                 pass
     
@@ -2431,73 +2168,31 @@ class SampleCharmGUI:
         
     def _create_button(self, parent, text, command, color, font=None, state=tk.NORMAL):
         """Create a styled button with appropriate colors for current style."""
-        # For Dub style: gold background with green text
-        if self.current_style.NAME == "Dub":
-            bg_color = "#FFCC00"  # Gold for Dub style
-            hover_bg = "#FFD700"  # Brighter gold for hover
-            text_color = "#0d1f0d"  # Dark green text for Dub style
-        else:
-            # Jack style: light grey background with black text
-            bg_color = "#4a4a4a"  # Light grey (BG_LIGHTER)
-            hover_bg = "#525252"  # Hover state (BG_HOVER)
-            text_color = "#000000"  # Black text for Jack style
-        
-        # On macOS, we need to force custom button rendering by using overrelief
+        s = self.current_style
         btn = tk.Button(
             parent,
             text=text,
             command=command,
-            bg=bg_color,
-            fg=text_color,
-            font=font or self.current_style.FONT_BODY,
+            bg=s.BTN_BG,
+            fg=s.BTN_FG,
+            font=font or s.FONT_BODY,
             relief=tk.FLAT,
             bd=0,
-            activebackground=hover_bg,
-            activeforeground=text_color,
+            activebackground=s.BTN_HOVER,
+            activeforeground=s.BTN_FG,
             highlightthickness=0,
-            highlightbackground=bg_color,
-            highlightcolor=bg_color,
-            overrelief=tk.FLAT,  # Prevent native macOS button styling
+            highlightbackground=s.BTN_BG,
+            highlightcolor=s.BTN_BG,
+            overrelief=tk.FLAT,
             state=state,
             cursor="hand2",
             padx=15,
             pady=8
         )
-        # Force button to use custom colors (important on macOS) - multiple times to ensure it sticks
-        try:
-            # Apply all styling options multiple times
-            btn.config(
-                bg=bg_color,
-                fg=text_color,
-                activebackground=hover_bg,
-                activeforeground=text_color,
-                highlightbackground=bg_color,
-                highlightcolor=bg_color,
-                relief=tk.FLAT,
-                borderwidth=0
-            )
-            btn.configure(
-                bg=bg_color,
-                fg=text_color,
-                activebackground=hover_bg,
-                activeforeground=text_color,
-                highlightbackground=bg_color,
-                highlightcolor=bg_color,
-                relief=tk.FLAT,
-                borderwidth=0
-            )
-            # Force one more time
-            btn.config(bg=bg_color, fg=text_color)
-        except:
-            pass
-        
-        # Store button reference for explicit updates
+        # Force colors on macOS
+        self._apply_btn_style(btn, repeats=3)
+
         self.all_buttons.append(btn)
-        
-        # Immediately apply full styling if in Dub mode (ensures buttons are gold from start)
-        if self.current_style.NAME == "Dub":
-            self._reapply_button_style(btn)
-        
         return btn
         
     def _load_files(self):
@@ -2938,9 +2633,11 @@ class SampleCharmGUI:
 
             # Auto-run AI features if any are enabled and feature manager is available
             enabled_count = sum(1 for v in self.ai_feature_vars.values() if v.get())
+            print(f"AI features check: enabled_count={enabled_count}, feature_manager={'present' if self.feature_manager else 'None'}")
             if enabled_count > 0 and self.feature_manager is not None:
+                print(f"Auto-running {enabled_count} AI features...")
                 self._update_progress(100, f"Analysis complete — running {enabled_count} AI feature(s)...")
-                self.root.after(100, self._run_ai_features)
+                self.root.after(0, self._run_ai_features)
         else:
             # Analysis was stopped or failed
             self._update_progress(100, "Analysis stopped")
@@ -3203,7 +2900,9 @@ class SampleCharmGUI:
 
     def _run_ai_features(self):
         """Run all enabled AI features and display results as table rows."""
+        print("_run_ai_features() called")
         if self.feature_manager is None:
+            print("_run_ai_features: feature_manager is None!")
             self._log_result("\n[AI Features] No feature manager available. "
                              "Check LLM configuration in config.yaml.\n")
             return
