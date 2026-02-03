@@ -89,48 +89,48 @@ class JackStyle:
 
 
 class DubStyle:
-    """Dub color scheme: Green and gold with red accents."""
-    
+    """Dub color scheme: Black background, red/green/gold Rasta accents."""
+
     NAME = "Dub"
-    
-    # Green and Gold Colors
-    BG_DARK = "#0d1f0d"      # Very dark green (almost black with green tint)
-    BG_MEDIUM = "#1a3a1a"    # Dark green
-    BG_LIGHT = "#2d5a2d"     # Medium green
-    BG_LIGHTER = "#FFCC00"   # Gold (replaces light green)
-    BG_HOVER = "#FFD700"     # Brighter gold for hover state
-    
-    # Text Colors (black)
-    TEXT_PRIMARY = "#000000"   # Black
-    TEXT_SECONDARY = "#1a1a1a" # Very dark grey (almost black)
-    TEXT_DIM = "#333333"       # Dark grey
-    TEXT_DISABLED = "#666666"  # Medium grey
-    
-    # Red Accents
-    ACCENT_RED = "#c62828"     # Deep red (same as Jack)
-    ACCENT_RED_LIGHT = "#e53935" # Lighter red for hover
-    ACCENT_RED_DIM = "#8e1e1e"   # Dimmed red
-    
+
+    # Black backgrounds
+    BG_DARK = "#0a0a0a"       # Near-black
+    BG_MEDIUM = "#161616"     # Dark grey
+    BG_LIGHT = "#222222"      # Medium dark
+    BG_LIGHTER = "#2e2e2e"    # Lighter dark
+    BG_HOVER = "#3a3a3a"      # Hover state
+
+    # Text Colors
+    TEXT_PRIMARY = "#e8e4d8"   # Warm off-white
+    TEXT_SECONDARY = "#FFCC00" # Gold for secondary labels
+    TEXT_DIM = "#888878"       # Muted warm grey
+    TEXT_DISABLED = "#555550"  # Dark warm grey
+
+    # Red Accent (Rasta red — progress bars, highlights)
+    ACCENT_RED = "#cc2020"     # Rasta red
+    ACCENT_RED_LIGHT = "#e03030"
+    ACCENT_RED_DIM = "#8e1818"
+
     # Gold Accent (for highlights)
     ACCENT_GOLD = "#FFCC00"    # Gold
-    ACCENT_GOLD_LIGHT = "#FFD700" # Lighter gold
-    ACCENT_GOLD_DIM = "#E6B800"   # Dimmed gold
-    
-    # Borders and Dividers (green-tinted)
-    BORDER = "#2d4a2d"        # Green border
-    BORDER_LIGHT = "#3d5a3d"  # Lighter green border
-    DIVIDER = "#1a3a1a"       # Divider lines (dark green)
-    
-    # Fonts (same as Jack)
+    ACCENT_GOLD_LIGHT = "#FFD700"
+    ACCENT_GOLD_DIM = "#E6B800"
+
+    # Borders and Dividers (subtle green tint)
+    BORDER = "#1a2a1a"        # Dark green-black border
+    BORDER_LIGHT = "#2a3a2a"  # Slightly lighter
+    DIVIDER = "#141e14"       # Divider lines
+
+    # Fonts
     FONT_TITLE = ("Helvetica", 16, "normal")
     FONT_HEADING = ("Helvetica", 11, "normal")
     FONT_BODY = ("Helvetica", 10, "normal")
     FONT_SMALL = ("Helvetica", 9, "normal")
 
-    # Button colors
-    BTN_BG = "#FFCC00"
-    BTN_FG = "#0d1f0d"
-    BTN_HOVER = "#FFD700"
+    # Button colors — green with gold text
+    BTN_BG = "#1a8a2a"
+    BTN_FG = "#FFCC00"
+    BTN_HOVER = "#22a836"
 
     @classmethod
     def configure_widget(cls, widget, bg=None, fg=None, font=None, relief="flat", bd=0):
