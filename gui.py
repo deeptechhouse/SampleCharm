@@ -147,38 +147,37 @@ class DubStyle:
 
 
 class BunkerStyle:
-    """Bunker: Berlin techno / industrial aesthetic — deep blacks, brass accent."""
+    """Bunker: Berlin techno / industrial — concrete blue-grey, hot orange accent."""
 
     NAME = "Bunker"
 
-    BG_DARK = "#0a0a0c"
-    BG_MEDIUM = "#14141a"
-    BG_LIGHT = "#1e1e24"
-    BG_LIGHTER = "#2a2a30"
-    BG_HOVER = "#3a3a40"
+    BG_DARK = "#0e1114"
+    BG_MEDIUM = "#1a1e22"
+    BG_LIGHT = "#252a30"
+    BG_LIGHTER = "#33393f"
+    BG_HOVER = "#3f474e"
 
-    TEXT_PRIMARY = "#d8d5cd"
-    TEXT_SECONDARY = "#9a9a9e"
-    TEXT_DIM = "#6a6a70"
-    TEXT_DISABLED = "#3a3a40"
+    TEXT_PRIMARY = "#c8cdd2"      # Cool grey
+    TEXT_SECONDARY = "#8a9199"
+    TEXT_DIM = "#5a6068"
+    TEXT_DISABLED = "#3a4048"
 
-    ACCENT_RED = "#c4a67a"       # Brass (primary accent)
-    ACCENT_RED_LIGHT = "#d4be88"
-    ACCENT_RED_DIM = "#8a7550"
+    ACCENT_RED = "#e85d26"        # Hot industrial orange
+    ACCENT_RED_LIGHT = "#f07040"
+    ACCENT_RED_DIM = "#a84018"
 
-    BORDER = "#2a2a30"
-    BORDER_LIGHT = "#3a3a40"
-    DIVIDER = "#1e1e24"
+    BORDER = "#2a3038"
+    BORDER_LIGHT = "#3a4048"
+    DIVIDER = "#1a1e22"
 
     FONT_TITLE = ("Helvetica Neue", 16, "normal")
     FONT_HEADING = ("Helvetica Neue", 11, "normal")
     FONT_BODY = ("Helvetica Neue", 10, "normal")
     FONT_SMALL = ("Menlo", 9, "normal")
 
-    # Button colors
-    BTN_BG = "#2a2a30"
-    BTN_FG = "#d8d5cd"
-    BTN_HOVER = "#3a3a40"
+    BTN_BG = "#e85d26"
+    BTN_FG = "#0e1114"
+    BTN_HOVER = "#f07040"
 
     @classmethod
     def configure_widget(cls, widget, bg=None, fg=None, font=None, relief="flat", bd=0):
@@ -187,37 +186,37 @@ class BunkerStyle:
 
 
 class ChryslerStyle:
-    """Chrysler: Art Deco / Streamline Moderne — charcoal, gold, cream."""
+    """Chrysler: Art Deco — deep navy, bright gold, cream text."""
 
     NAME = "Chrysler"
 
-    BG_DARK = "#0c0b08"
-    BG_MEDIUM = "#1a1812"
-    BG_LIGHT = "#2a2720"
-    BG_LIGHTER = "#3a362e"
-    BG_HOVER = "#4a4538"
+    BG_DARK = "#0a0e18"
+    BG_MEDIUM = "#141a2a"
+    BG_LIGHT = "#1e263a"
+    BG_LIGHTER = "#2a3450"
+    BG_HOVER = "#364060"
 
-    TEXT_PRIMARY = "#e8dcc0"      # Cream
-    TEXT_SECONDARY = "#c4a667"    # Gold
-    TEXT_DIM = "#8a7e60"
-    TEXT_DISABLED = "#5a5444"
+    TEXT_PRIMARY = "#f0e8d0"      # Warm cream
+    TEXT_SECONDARY = "#b0a880"
+    TEXT_DIM = "#706848"
+    TEXT_DISABLED = "#4a4430"
 
-    ACCENT_RED = "#c4a667"       # Gold (primary accent)
-    ACCENT_RED_LIGHT = "#d4be88"
-    ACCENT_RED_DIM = "#8a7a4a"
+    ACCENT_RED = "#d4a820"        # Bright gold
+    ACCENT_RED_LIGHT = "#e8c030"
+    ACCENT_RED_DIM = "#a08018"
 
-    BORDER = "#3a362e"
-    BORDER_LIGHT = "#4a4538"
-    DIVIDER = "#2a2720"
+    BORDER = "#2a3450"
+    BORDER_LIGHT = "#364060"
+    DIVIDER = "#141a2a"
 
     FONT_TITLE = ("Georgia", 16, "normal")
     FONT_HEADING = ("Georgia", 11, "normal")
     FONT_BODY = ("Helvetica", 10, "normal")
     FONT_SMALL = ("Courier", 9, "normal")
 
-    BTN_BG = "#c4a667"
-    BTN_FG = "#0c0b08"
-    BTN_HOVER = "#d4be88"
+    BTN_BG = "#d4a820"
+    BTN_FG = "#0a0e18"
+    BTN_HOVER = "#e8c030"
 
     @classmethod
     def configure_widget(cls, widget, bg=None, fg=None, font=None, relief="flat", bd=0):
@@ -226,37 +225,37 @@ class ChryslerStyle:
 
 
 class VoidStyle:
-    """Void: Japanese minimalism — maximum restraint, near-black and off-white."""
+    """Void: Ultraviolet — deep black, electric purple accent."""
 
     NAME = "Void"
 
-    BG_DARK = "#0c0c0c"
-    BG_MEDIUM = "#161616"
-    BG_LIGHT = "#202020"
-    BG_LIGHTER = "#2c2c2c"
-    BG_HOVER = "#383838"
+    BG_DARK = "#08060c"
+    BG_MEDIUM = "#12101a"
+    BG_LIGHT = "#1c1828"
+    BG_LIGHTER = "#282238"
+    BG_HOVER = "#342e48"
 
-    TEXT_PRIMARY = "#f5f4f0"     # Off-white
-    TEXT_SECONDARY = "#b0aea8"
-    TEXT_DIM = "#706e68"
-    TEXT_DISABLED = "#484846"
+    TEXT_PRIMARY = "#e0dce8"      # Lavender white
+    TEXT_SECONDARY = "#a098b0"
+    TEXT_DIM = "#686080"
+    TEXT_DISABLED = "#403858"
 
-    ACCENT_RED = "#f5f4f0"       # Off-white accent (monochrome)
-    ACCENT_RED_LIGHT = "#ffffff"
-    ACCENT_RED_DIM = "#b0aea8"
+    ACCENT_RED = "#9b59e0"        # Electric purple
+    ACCENT_RED_LIGHT = "#b070f0"
+    ACCENT_RED_DIM = "#7040a8"
 
-    BORDER = "#202020"
-    BORDER_LIGHT = "#2c2c2c"
-    DIVIDER = "#161616"
+    BORDER = "#1c1828"
+    BORDER_LIGHT = "#282238"
+    DIVIDER = "#12101a"
 
     FONT_TITLE = ("Helvetica Neue", 15, "normal")
     FONT_HEADING = ("Helvetica Neue", 10, "normal")
     FONT_BODY = ("Helvetica Neue", 10, "normal")
     FONT_SMALL = ("Menlo", 8, "normal")
 
-    BTN_BG = "#202020"
-    BTN_FG = "#f5f4f0"
-    BTN_HOVER = "#2c2c2c"
+    BTN_BG = "#9b59e0"
+    BTN_FG = "#08060c"
+    BTN_HOVER = "#b070f0"
 
     @classmethod
     def configure_widget(cls, widget, bg=None, fg=None, font=None, relief="flat", bd=0):
@@ -265,37 +264,37 @@ class VoidStyle:
 
 
 class PatinaStyle:
-    """Patina: Warm earth / Danish functionalism — oxidized copper, verdigris."""
+    """Patina: Oxidized copper — warm brown-black, bright verdigris/teal buttons."""
 
     NAME = "Patina"
 
-    BG_DARK = "#0d0c0a"
-    BG_MEDIUM = "#1a1814"
-    BG_LIGHT = "#28241e"
-    BG_LIGHTER = "#38342c"
-    BG_HOVER = "#484438"
+    BG_DARK = "#0c0e0c"
+    BG_MEDIUM = "#161a16"
+    BG_LIGHT = "#202620"
+    BG_LIGHTER = "#2c3430"
+    BG_HOVER = "#384038"
 
-    TEXT_PRIMARY = "#e0d8c8"     # Warm linen
-    TEXT_SECONDARY = "#a09880"
-    TEXT_DIM = "#706850"
-    TEXT_DISABLED = "#484030"
+    TEXT_PRIMARY = "#d8e0d0"      # Warm sage white
+    TEXT_SECONDARY = "#98a890"
+    TEXT_DIM = "#607058"
+    TEXT_DISABLED = "#404840"
 
-    ACCENT_RED = "#7ac4a0"       # Verdigris / patina green
-    ACCENT_RED_LIGHT = "#8ad4b0"
-    ACCENT_RED_DIM = "#5a9478"
+    ACCENT_RED = "#2eb8a0"        # Bright verdigris teal
+    ACCENT_RED_LIGHT = "#40d0b8"
+    ACCENT_RED_DIM = "#1e8878"
 
-    BORDER = "#28241e"
-    BORDER_LIGHT = "#38342c"
-    DIVIDER = "#1a1814"
+    BORDER = "#202620"
+    BORDER_LIGHT = "#2c3430"
+    DIVIDER = "#161a16"
 
     FONT_TITLE = ("Georgia", 16, "normal")
     FONT_HEADING = ("Helvetica", 11, "normal")
     FONT_BODY = ("Helvetica", 10, "normal")
     FONT_SMALL = ("Menlo", 9, "normal")
 
-    BTN_BG = "#38342c"
-    BTN_FG = "#e0d8c8"
-    BTN_HOVER = "#484438"
+    BTN_BG = "#2eb8a0"
+    BTN_FG = "#0c0e0c"
+    BTN_HOVER = "#40d0b8"
 
     @classmethod
     def configure_widget(cls, widget, bg=None, fg=None, font=None, relief="flat", bd=0):
@@ -1685,7 +1684,7 @@ class SampleCharmGUI:
             for btn in [self.waveform_panel._zoom_in_btn,
                        self.waveform_panel._zoom_out_btn,
                        self.waveform_panel._reset_btn]:
-                self._apply_btn_style(btn, repeats=5)
+                self._apply_btn_style(btn, repeats=2)
 
         # Search/filter frame
         search_frame = tk.Frame(right_panel, bg=MinimalistStyle.BG_DARK)
@@ -1832,64 +1831,22 @@ class SampleCharmGUI:
         
         # Update all widgets with new style
         self._update_style()
-        
-        # Force immediate GUI update - multiple passes to clear cache
-        for _ in range(3):
-            self.root.update_idletasks()
-            self.root.update()
-        
-        # Aggressively update all buttons multiple times (macOS needs this)
-        # Immediate update first
-        self._force_update_all_buttons()
-        # Then scheduled updates with cache clearing
-        for delay in [10, 50, 100, 200, 500, 1000]:
-            self.root.after(delay, lambda: self._force_update_all_buttons() or self.root.update_idletasks() or self.root.update())
+
+        # Single forced GUI refresh
+        self.root.update_idletasks()
+        self.root.update()
+
+        # One follow-up pass for macOS button quirks
+        self.root.after(50, self._force_update_all_buttons)
     
     def _setup_button_style_protection(self):
-        """Set up event bindings to protect button styling."""
+        """Set up lightweight event bindings to protect button styling on macOS."""
         def protect_buttons_after_event(event=None):
-            """Re-apply button styling after any event."""
-            # Use after() to avoid recursion and ensure it happens after the event
             self.root.after(10, self._force_update_all_buttons)
-        
-        # Bind to common events that might reset button styling
-        self.root.bind('<Button-1>', protect_buttons_after_event)
-        self.root.bind('<ButtonRelease-1>', protect_buttons_after_event)
+
+        # Only re-apply on focus changes (the main cause of macOS resets)
         self.root.bind('<FocusIn>', protect_buttons_after_event)
         self.root.bind('<FocusOut>', protect_buttons_after_event)
-        
-        # Also bind to all buttons directly
-        def bind_to_button(btn):
-            """Recursively bind events to all buttons."""
-            try:
-                if btn.winfo_class() == 'Button':
-                    try:
-                        text = btn.cget('text')
-                        if text not in self._style_names():
-                            btn.bind('<Button-1>', protect_buttons_after_event)
-                            btn.bind('<ButtonRelease-1>', protect_buttons_after_event)
-                            btn.bind('<Enter>', protect_buttons_after_event)
-                            btn.bind('<Leave>', protect_buttons_after_event)
-                    except:
-                        pass
-            except:
-                pass
-            
-            try:
-                for child in btn.winfo_children():
-                    bind_to_button(child)
-            except:
-                pass
-        
-        # Bind to all existing buttons
-        bind_to_button(self.root)
-        
-        # Also set up a periodic refresh for buttons (every 500ms)
-        def periodic_button_refresh():
-            self._force_update_all_buttons()
-            self.root.after(500, periodic_button_refresh)
-        
-        periodic_button_refresh()
     
     def _style_names(self):
         """Return set of all style names (for toggle button skip check)."""
@@ -1920,59 +1877,21 @@ class SampleCharmGUI:
         except:
             pass
 
-        self._apply_btn_style(btn, repeats=5)
-        try:
-            btn.update_idletasks()
-        except:
-            pass
+        self._apply_btn_style(btn, repeats=2)
     
     def _force_update_all_buttons(self):
-        """Force update all buttons - aggressive version for macOS."""
+        """Force update all buttons for macOS."""
         style_names = self._style_names()
 
-        def force_button_update(widget):
-            try:
-                if widget.winfo_class() == 'Button':
-                    try:
-                        text = widget.cget('text')
-                        if text not in style_names:
-                            self._apply_btn_style(widget, repeats=3)
-                            try:
-                                widget.update_idletasks()
-                            except:
-                                pass
-                    except:
-                        pass
-            except:
-                pass
-            try:
-                for child in widget.winfo_children():
-                    force_button_update(child)
-            except:
-                pass
-
-        for _ in range(3):
-            force_button_update(self.root)
-
-        # Explicitly update all stored button references
+        # Use the stored button list — faster than recursive traversal
         if hasattr(self, 'all_buttons'):
             for btn in self.all_buttons:
                 try:
                     text = btn.cget('text')
                     if text not in style_names:
-                        self._apply_btn_style(btn, repeats=5)
-                        btn.update_idletasks()
+                        self._apply_btn_style(btn, repeats=2)
                 except:
                     pass
-
-        # Also update waveform panel buttons
-        if hasattr(self, 'waveform_panel') and self.waveform_panel:
-            try:
-                for attr in ('_zoom_in_btn', '_zoom_out_btn', '_reset_btn'):
-                    if hasattr(self.waveform_panel, attr):
-                        self._apply_btn_style(getattr(self.waveform_panel, attr), repeats=5)
-            except:
-                pass
 
         self.root.update_idletasks()
     
@@ -1980,17 +1899,11 @@ class SampleCharmGUI:
         """Update all widgets to use current style."""
         # Update root window
         self.root.configure(bg=self.current_style.BG_DARK)
-        
-        # Explicitly update all buttons FIRST (most important)
-        self._update_all_buttons()
-        
-        # Then update all frames and widgets recursively
+
+        # Update all frames and widgets recursively (includes buttons)
         self._update_widget_style(self.root)
-        
-        # Force another button update after widget style update (in case anything was reset)
-        self._update_all_buttons()
-        
-        # Also call the aggressive force update
+
+        # Single button force-pass to catch macOS rendering quirks
         self._force_update_all_buttons()
         
         # Update ttk styles
@@ -2135,22 +2048,12 @@ class SampleCharmGUI:
             except Exception:
                 pass
 
-        for _ in range(5):
-            update_button_recursive(self.root)
+        update_button_recursive(self.root)
 
         try:
             self.root.update_idletasks()
         except:
             pass
-
-        # Also update waveform panel buttons
-        if hasattr(self, 'waveform_panel') and self.waveform_panel:
-            try:
-                for attr in ('_zoom_in_btn', '_zoom_out_btn', '_reset_btn'):
-                    if hasattr(self.waveform_panel, attr):
-                        self._apply_btn_style(getattr(self.waveform_panel, attr), repeats=3)
-            except Exception:
-                pass
     
     def _apply_styling(self):
         """Apply styling to all widgets."""
@@ -2190,7 +2093,7 @@ class SampleCharmGUI:
             pady=8
         )
         # Force colors on macOS
-        self._apply_btn_style(btn, repeats=3)
+        self._apply_btn_style(btn, repeats=2)
 
         self.all_buttons.append(btn)
         return btn
